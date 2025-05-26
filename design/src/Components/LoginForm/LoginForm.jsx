@@ -28,6 +28,11 @@ export const LoginForm = () => {
     }
   }
 
+   const handleSignupClick = () => {
+    navigate('/signup'); 
+  };
+
+
   return (
     <div className='wrapper'>
       <form onSubmit={handleLogin}>
@@ -63,7 +68,14 @@ export const LoginForm = () => {
         {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
         <div className="register-link">
-          <p>Don't have an account? <a href="#">Sign up</a> </p>
+          <p>Don't have an account? <a href="#" onClick={(e) => {
+          e.preventDefault(); 
+          handleSignupClick();
+        }}>
+          Sign up
+        </a>
+      </p>
+
         </div>
       </form>
     </div>

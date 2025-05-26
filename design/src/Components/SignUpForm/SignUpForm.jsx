@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import supabase from '../../helper/supabaseClient'
 import './SignUpForm.css'
+import { FaEnvelope, FaLock } from "react-icons/fa"
+import { useNavigate } from 'react-router-dom'
 
 const SignUpForm = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault()
@@ -26,10 +29,16 @@ const SignUpForm = () => {
     }
   }
 
+   const handleLoginClick = () => {
+    navigate('/login'); 
+  };
+
+
   return (
     <div className="wrapper">
       <form onSubmit={handleSignUp}>
         <h1>Sign Up</h1>
+        <div className="input-box">
         <input
           type="email"
           placeholder="Email"
@@ -37,17 +46,39 @@ const SignUpForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+        <FaEnvelope className='icon' />
+        </div>
+        
+        <div className="input-box">
         <input
           type="password"
-          placeholder="Password (6+ chars)"
+          placeholder="Password (6 or More Characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        <FaLock className='icon' />
+        </div>
+
+        <div className="remember-forgot">
+          <label><input type="checkbox" />I agree to the terms and conditions</label>
+        </div>
+
         <button type="submit">Create Account</button>
 
         {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
         {success && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
+
+        <div className="register-link">
+          <p>Already have an account? <a href="#" onClick={(e) => {
+          e.preventDefault(); 
+          handleLoginClick();
+        }}>
+          Login
+        </a>
+      </p>
+        </div>
+
       </form>
     </div>
   )
