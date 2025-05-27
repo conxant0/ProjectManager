@@ -36,7 +36,7 @@ export const LoginForm = () => {
   return (
     <div className='wrapper'>
       <form onSubmit={handleLogin}>
-        <h1>Login</h1>
+        <h1>Sign In to Your Account</h1>
         <div className="input-box">
           <input
             type="email"
@@ -68,7 +68,7 @@ export const LoginForm = () => {
         {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
         <div className="register-link">
-          <p>Don't have an account? <a href="#" onClick={(e) => {
+          <p>Don't have an account? <a href="/signup" onClick={(e) => {
           e.preventDefault(); 
           handleSignupClick();
         }}>

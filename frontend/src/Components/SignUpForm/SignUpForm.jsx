@@ -70,7 +70,7 @@ const SignUpForm = () => {
         {success && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
 
         <div className="register-link">
-          <p>Already have an account? <a href="#" onClick={(e) => {
+          <p>Already have an account? <a href="/login" onClick={(e) => {
           e.preventDefault(); 
           handleLoginClick();
         }}>
