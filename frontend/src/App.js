@@ -1,29 +1,51 @@
-import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate
+} from 'react-router-dom';
 
-import LoginForm from './Components/LoginForm/LoginForm'
-import SignUpForm from './Components/SignUpForm/SignUpForm'
-import Dashboard from './Components/Dashboard/Dashboard'
-import supabase from './helper/supabaseClient'
+import LoginForm from './Components/LoginForm/LoginForm';
+import SignUpForm from './Components/SignUpForm/SignUpForm';
+import Dashboard from './Components/Dashboard/Dashboard';
+import Profile from './Components/Profile/Profile';
+import ProjectForm from './Components/ProjectForm/ProjectForm';
+import supabase from './helper/supabaseClient';
+
+// ProjectForm wrapper to support onCancel and onSave
+const ProjectFormWrapper = () => {
+  const navigate = useNavigate();
+
+  const handleCancel = () => {
+    navigate('/dashboard');
+  };
+
+  const handleSave = (data) => {
+    console.log('Project saved:', data); // Add your Supabase logic here
+    navigate('/dashboard');
+  };
+
+  return <ProjectForm onCancel={handleCancel} onSave={handleSave} />;
+};
 
 function App() {
-  const [session, setSession] = useState(null)
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // Check if user is already logged in on mount
-    const currentSession = supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-    })
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
 
-    // Listen for auth changes (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
+      setSession(session);
+    });
 
     return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [])
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <Router>
@@ -44,9 +66,17 @@ function App() {
           path="/dashboard"
           element={session ? <Dashboard /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/profile"
+          element={session ? <Profile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/add-project"
+          element={session ? <ProjectFormWrapper /> : <Navigate to="/login" />}
+        />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
