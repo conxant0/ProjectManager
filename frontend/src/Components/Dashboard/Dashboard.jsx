@@ -2,25 +2,30 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 
+
+const sampleProjects = [
+  {
+    title: 'Website',
+    description: 'Description',
+    tags: ['NextJS', 'HTML', 'TypeScript'],
+    type: 'Website',
+    thumbnailColor: 'darkred',
+  },
+  // Add more sample projects if needed
+]
+
 const Dashboard = () => {
   const navigate = useNavigate()
   const [darkMode, setDarkMode] = useState(false)
   const [editorMode, setEditorMode] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
 
-  const handleLogout = () => {
-    navigate('/')
-  }
-
-  const goToProfile = () => {
-    navigate('/profile')
-  }
-
+  const handleLogout = () => navigate('/')
+  const goToProfile = () => navigate('/profile')
   const goToAddProject = () => {
-  if (editorMode) {
-    navigate('/add-project');
+    if (editorMode) navigate('/add-project')
   }
-  };
-
+const [mediaUrl, setMediaUrl] = useState('');
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
@@ -61,23 +66,39 @@ const Dashboard = () => {
               <p>Click to add a new project</p>
             </div>
           )}
-          {[...Array(4)].map((_, i) => (
-            <div className={`project-card ${darkMode ? 'dark' : 'light'}`} key={i}>
-              <div className="project-thumbnail"></div>
-              <h3>Website</h3>
-              <p>Description</p>
+
+          {sampleProjects.map((project, i) => (
+            <div
+              className={`project-card ${darkMode ? 'dark' : 'light'}`}
+              key={i}
+              onClick={() => setSelectedProject(project)}
+            >
+              <div className="project-thumbnail" style={{ backgroundColor: project.thumbnailColor }}></div>
+              <h3>{project.title}</h3>
+              <p>{project.description}</p>
               <div className="tags">
-                <span>NextJS</span>
-                <span>HTML</span>
-                <span>TypeScript</span>
-                <span>NextJS</span>
+                {project.tags.map((tag, j) => <span key={j}>{tag}</span>)}
               </div>
               <div className="badges">
-                <span className="badge">🌐 Website</span>
+                <span className="badge">🌐 {project.type}</span>
               </div>
             </div>
           ))}
         </div>
+
+
+        
+        {selectedProject && (
+          <div className="modal-overlay" onClick={() => setSelectedProject(null)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <button className="close-btn" onClick={() => setSelectedProject(null)}>×</button>
+              <h2>{selectedProject.title}</h2>
+              <p>{selectedProject.description}</p>
+              <p><strong>Tags:</strong> {selectedProject.tags.join(', ')}</p>
+              <p><strong>Type:</strong> {selectedProject.type}</p>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
