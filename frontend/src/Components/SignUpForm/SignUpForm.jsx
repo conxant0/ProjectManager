@@ -5,6 +5,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa"
 import { useNavigate } from 'react-router-dom'
 
 const SignUpForm = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -12,22 +13,47 @@ const SignUpForm = () => {
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setSuccess(null)
+  e.preventDefault();
+  setError(null);
+  setSuccess(null);
 
-    const { data, error } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-    })
+    });
 
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccess('Sign-up successful! Check your email for confirmation.')
-      console.log(data)
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
     }
-  }
+
+    const userID = signUpData?.user?.id;
+
+    if (!userID) {
+      setError('Signup succeeded but user ID is missing.');
+      return;
+    }
+
+    // Insert into your custom User table
+    const { error: insertError } = await supabase.from('User').insert([
+      {
+        userID,  // case-sensitive column name
+        name,
+        email,   // make sure to store email too
+      },
+    ]);
+
+    if (insertError) {
+      console.error('User insert error:', insertError);
+      setError('Signed up, but failed to save user info: ' + insertError.message);
+      return;
+    }
+
+    setSuccess('Sign-up successful!');
+    console.log('User signed up and saved:', signUpData.user);
+  };
+
+
 
    const handleLoginClick = () => {
     navigate('/login'); 
@@ -48,7 +74,17 @@ const SignUpForm = () => {
         />
         <FaEnvelope className='icon' />
         </div>
-        
+
+        <div className="input-box">
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        </div>
+
         <div className="input-box">
         <input
           type="password"
