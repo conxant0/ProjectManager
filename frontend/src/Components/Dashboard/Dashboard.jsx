@@ -1,15 +1,21 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
+import supabase from '../../helper/supabaseClient'
 
 const Dashboard = () => {
   const navigate = useNavigate()
   const [darkMode, setDarkMode] = useState(false)
   const [editorMode, setEditorMode] = useState(false)
 
-  const handleLogout = () => {
-    navigate('/')
-  }
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error.message);
+      return;
+    }
+    navigate('/login');
+  };
 
   const goToProfile = () => {
     navigate('/profile')
