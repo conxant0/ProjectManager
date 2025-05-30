@@ -2,6 +2,10 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 import supabase from '../../helper/supabaseClient'
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin
 
 const sampleProjects = [
   {
@@ -13,6 +17,8 @@ const sampleProjects = [
   },
   // Add more sample projects if needed
 ]
+=======
+>>>>>>> 0dd64c04cf7e81e25557d6cde46725362038560f
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -21,6 +27,7 @@ const Dashboard = () => {
   const [selectedProject, setSelectedProject] = useState(null)
 
   const handleLogout = async () => {
+<<<<<<< HEAD
     const { error } = await supabase.auth.signOut()
     if (error) {
       console.error('Logout failed:', error.message)
@@ -28,10 +35,39 @@ const Dashboard = () => {
       navigate('/') 
     }
   }
+=======
+<<<<<<< HEAD
+    const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error('Logout failed:', error.message)
+  } else {
+    navigate('/') // redirect to home/login after logout
+    }
+  }
+  
+>>>>>>> origin
   const goToProfile = () => navigate('/profile')
+=======
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error.message);
+      return;
+    }
+    navigate('/login');
+  };
+
+  const goToProfile = () => {
+    navigate('/profile')
+  }
+
+>>>>>>> 0dd64c04cf7e81e25557d6cde46725362038560f
   const goToAddProject = () => {
     if (editorMode) navigate('/add-project')
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
