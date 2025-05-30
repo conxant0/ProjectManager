@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
-
+import supabase from '../../helper/supabaseClient'
 
 const sampleProjects = [
   {
@@ -20,12 +20,20 @@ const Dashboard = () => {
   const [editorMode, setEditorMode] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
 
-  const handleLogout = () => navigate('/')
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error('Logout failed:', error.message)
+  } else {
+    navigate('/') // redirect to home/login after logout
+    }
+  }
+  
   const goToProfile = () => navigate('/profile')
   const goToAddProject = () => {
     if (editorMode) navigate('/add-project')
   }
-const [mediaUrl, setMediaUrl] = useState('');
+
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
