@@ -169,6 +169,10 @@
   color: #eee;
 }
 
+.dark .nav-btn {
+  color: #eee;
+}
+
 /* Project cards */
 .project-card.light {
   background-color: #fff;
@@ -229,15 +233,24 @@
   z-index: 999;
 }
 
+.dark .modal-overlay {
+  background-color: rgba(40, 40, 40, 0.7);
+  color: #fff;
+}
+
+
 .modal {
-  background-color: #fff;
-  padding: 20px 24px;
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  width: 350px;
-  max-width: 90%;
-  position: relative;
-  font-family: Arial, sans-serif;
+  background-color: white;
+  color: black;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal.dark {
+  background-color: #1e1e1e;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
 }
 
 .close-btn {

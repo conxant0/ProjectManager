@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 import supabase from '../../helper/supabaseClient'
@@ -11,7 +11,7 @@ const sampleProjects = [
     type: 'Website',
     thumbnailColor: 'darkred',
   },
-  // Add more sample projects if needed
+  
 ]
 
 const Dashboard = () => {
@@ -19,23 +19,30 @@ const Dashboard = () => {
   const [darkMode, setDarkMode] = useState(false)
   const [editorMode, setEditorMode] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
+  const [projects, setProjects] = useState([])
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut()
     if (error) {
-      console.error('Error logging out:', error.message);
-      return;
+      console.error('Logout failed:', error.message)
+    } else {
+      navigate('/') 
     }
-    navigate('/login');
-  };
-
-  const goToProfile = () => {
-    navigate('/profile')
   }
-
+  const goToProfile = () => navigate('/profile')
   const goToAddProject = () => {
     if (editorMode) navigate('/add-project')
   }
+
+const fetchProjects = async () => {
+    const { data, error } = await supabase.from('Project').select('*')
+    if (!error) setProjects(data)
+    else console.error(error)
+  }
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
 
 
   return (
@@ -46,9 +53,9 @@ const Dashboard = () => {
         </div>
         <nav className="nav-links">
           <button className="nav-btn">PROJECTS</button>
-          <button className="nav-btn">PROJECTS</button>
-          <button className="nav-btn">PROJECTS</button>
-          <button className="nav-btn">PROJECTS</button>
+          <button className="nav-btn">OPTION 1</button>
+          <button className="nav-btn">OPTION 2</button>
+          <button className="nav-btn">OPTION 3</button>
         </nav>
         <button className="logout-btn" onClick={handleLogout}>LOGOUT</button>
       </aside>
@@ -78,17 +85,22 @@ const Dashboard = () => {
             </div>
           )}
 
-          {sampleProjects.map((project, i) => (
+          {projects.map((project, i) => (
             <div
               className={`project-card ${darkMode ? 'dark' : 'light'}`}
-              key={i}
+              key={project.id || i}
               onClick={() => setSelectedProject(project)}
             >
               <div className="project-thumbnail" style={{ backgroundColor: project.thumbnailColor }}></div>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <div className="tags">
-                {project.tags.map((tag, j) => <span key={j}>{tag}</span>)}
+                {(Array.isArray(project.tags) 
+                    ? project.tags 
+                    : typeof project.tags === 'string' 
+                      ? project.tags.split(',').map(tag => tag.trim()) 
+                      : []
+                  ).map((tag, j) => <span key={j}>{tag}</span>)}
               </div>
               <div className="badges">
                 <span className="badge">🌐 {project.type}</span>
@@ -101,11 +113,19 @@ const Dashboard = () => {
         
         {selectedProject && (
           <div className="modal-overlay" onClick={() => setSelectedProject(null)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className={`modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
               <button className="close-btn" onClick={() => setSelectedProject(null)}>×</button>
               <h2>{selectedProject.title}</h2>
               <p>{selectedProject.description}</p>
-              <p><strong>Tags:</strong> {selectedProject.tags.join(', ')}</p>
+              <p>
+                <strong>Tags:</strong>{' '}
+                {(Array.isArray(selectedProject.tags)
+                  ? selectedProject.tags
+                  : typeof selectedProject.tags === 'string'
+                    ? selectedProject.tags.split(',').map(tag => tag.trim())
+                    : []
+                ).join(', ')}
+              </p>
               <p><strong>Type:</strong> {selectedProject.type}</p>
             </div>
           </div>
