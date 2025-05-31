@@ -2,17 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 import supabase from '../../helper/supabaseClient'
-
-const sampleProjects = [
-  {
-    title: 'Website',
-    description: 'Description',
-    tags: ['NextJS', 'HTML', 'TypeScript'],
-    type: 'Website',
-    thumbnailColor: 'darkred',
-  },
-  
-]
+import ProjectModal from './ProjectModal'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -20,6 +10,29 @@ const Dashboard = () => {
   const [editorMode, setEditorMode] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
   const [projects, setProjects] = useState([])
+  const [userId, setUserId] = useState(null)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data?.user) setUserId(data.user.id)
+    }
+    getUser()
+  }, [])
+
+  const fetchProjects = async (uid) => {
+    if (!uid) return
+    const { data, error } = await supabase
+      .from('Project')
+      .select('*')
+      .eq('userID', uid)
+    if (!error) setProjects(data)
+    else console.error(error)
+  }
+
+  useEffect(() => {
+    if (userId) fetchProjects(userId)
+  }, [userId])
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
@@ -33,17 +46,6 @@ const Dashboard = () => {
   const goToAddProject = () => {
     if (editorMode) navigate('/add-project')
   }
-
-const fetchProjects = async () => {
-    const { data, error } = await supabase.from('Project').select('*')
-    if (!error) setProjects(data)
-    else console.error(error)
-  }
-
-  useEffect(() => {
-    fetchProjects()
-  }, [])
-
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
@@ -91,16 +93,25 @@ const fetchProjects = async () => {
               key={project.id || i}
               onClick={() => setSelectedProject(project)}
             >
-              <div className="project-thumbnail" style={{ backgroundColor: project.thumbnailColor }}></div>
+              {project.imageUrl ? (
+                <img
+                  src={project.imageUrl}
+                  alt={project.title}
+                  className="project-thumbnail"
+                  style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
+                />
+              ) : (
+                <div className="project-thumbnail" style={{ backgroundColor: project.thumbnailColor, height: 120 }}></div>
+              )}
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <div className="tags">
-                {(Array.isArray(project.tags) 
-                    ? project.tags 
-                    : typeof project.tags === 'string' 
-                      ? project.tags.split(',').map(tag => tag.trim()) 
-                      : []
-                  ).map((tag, j) => <span key={j}>{tag}</span>)}
+                {(Array.isArray(project.tags)
+                  ? project.tags
+                  : typeof project.tags === 'string'
+                    ? project.tags.split(',').map(tag => tag.trim())
+                    : []
+                ).map((tag, j) => <span key={j}>{tag}</span>)}
               </div>
               <div className="badges">
                 <span className="badge">🌐 {project.type}</span>
@@ -109,26 +120,12 @@ const fetchProjects = async () => {
           ))}
         </div>
 
-
-        
         {selectedProject && (
-          <div className="modal-overlay" onClick={() => setSelectedProject(null)}>
-            <div className={`modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
-              <button className="close-btn" onClick={() => setSelectedProject(null)}>×</button>
-              <h2>{selectedProject.title}</h2>
-              <p>{selectedProject.description}</p>
-              <p>
-                <strong>Tags:</strong>{' '}
-                {(Array.isArray(selectedProject.tags)
-                  ? selectedProject.tags
-                  : typeof selectedProject.tags === 'string'
-                    ? selectedProject.tags.split(',').map(tag => tag.trim())
-                    : []
-                ).join(', ')}
-              </p>
-              <p><strong>Type:</strong> {selectedProject.type}</p>
-            </div>
-          </div>
+          <ProjectModal
+            project={selectedProject}
+            darkMode={darkMode}
+            onClose={() => setSelectedProject(null)}
+          />
         )}
       </main>
     </div>
