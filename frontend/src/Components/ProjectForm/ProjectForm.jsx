@@ -19,7 +19,10 @@ const ProjectForm = ({ onCancel, onSave }) => {
     file: null,
     tools: '',
     role: '',
-    timeline: ''
+    timeline: '',
+    githubURL: '',
+    figmaURL: '',
+    notionURL: ''
   })
 
   // Get current user on component mount
@@ -39,6 +42,16 @@ const ProjectForm = ({ onCancel, onSave }) => {
     } catch (error) {
       console.error('Error getting current user:', error)
       setError('Failed to get user information: ' + error.message)
+    }
+  }
+
+  // URL validation helper function
+  const isValidURL = (string) => {
+    try {
+      new URL(string)
+      return true
+    } catch (_) {
+      return false
     }
   }
 
@@ -100,6 +113,20 @@ const ProjectForm = ({ onCancel, onSave }) => {
       return
     }
 
+    // URL validation for optional fields
+    const urlFields = [
+      { field: 'githubURL', name: 'GitHub URL' },
+      { field: 'figmaURL', name: 'Figma URL' },
+      { field: 'notionURL', name: 'Notion URL' }
+    ]
+
+    for (const { field, name } of urlFields) {
+      if (formData[field].trim() && !isValidURL(formData[field].trim())) {
+        setError(`Please enter a valid ${name}`)
+        return
+      }
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -117,6 +144,9 @@ const ProjectForm = ({ onCancel, onSave }) => {
           tools: formData.tools.trim(),
           role: formData.role.trim(),
           timeline: formData.timeline.trim(),
+          githubURL: formData.githubURL.trim() || null,
+          figmaURL: formData.figmaURL.trim() || null,
+          notionURL: formData.notionURL.trim() || null,
           userID: currentUser.id
         })
         .select()
@@ -293,6 +323,32 @@ const ProjectForm = ({ onCancel, onSave }) => {
         value={formData.timeline} 
         onChange={handleChange}
         disabled={isLoading}
+      />
+
+      <h3>Project Links</h3>
+      <input 
+        placeholder="GitHub Repository URL (optional)" 
+        name="githubURL" 
+        value={formData.githubURL} 
+        onChange={handleChange}
+        disabled={isLoading}
+        type="url"
+      />
+      <input 
+        placeholder="Figma Design URL (optional)" 
+        name="figmaURL" 
+        value={formData.figmaURL} 
+        onChange={handleChange}
+        disabled={isLoading}
+        type="url"
+      />
+      <input 
+        placeholder="Notion Documentation URL (optional)" 
+        name="notionURL" 
+        value={formData.notionURL} 
+        onChange={handleChange}
+        disabled={isLoading}
+        type="url"
       />
 
       <div className="form-buttons">
