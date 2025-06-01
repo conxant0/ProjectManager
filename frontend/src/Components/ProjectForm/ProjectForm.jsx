@@ -52,6 +52,40 @@ const ProjectForm = ({ onCancel, onSave }) => {
     if (error) setError('')
   }
 
+  const uploadFile = async (file, projectId) => {
+    try {
+      // Create unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${projectId}_${Date.now()}.${fileExt}`
+      const filePath = `project-files/${fileName}`
+
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('project-files')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // Insert file record into Media table
+      const { data: mediaData, error: mediaError } = await supabase
+        .from('Media')
+        .insert({
+          fileName: file.name,
+          fileType: file.type,
+          projectID: projectId,
+          filePATH: uploadData.path
+        })
+        .select()
+
+      if (mediaError) throw mediaError
+
+      return mediaData[0]
+    } catch (error) {
+      console.error('File upload error:', error)
+      throw new Error(`File upload failed: ${error.message}`)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
@@ -70,6 +104,7 @@ const ProjectForm = ({ onCancel, onSave }) => {
     setError('')
 
     try {
+      // Insert project into database
       const { data: projectData, error: projectError } = await supabase
         .from('Project')
         .insert({
@@ -89,41 +124,18 @@ const ProjectForm = ({ onCancel, onSave }) => {
       if (projectError) throw projectError
 
       const project = projectData[0]
-      let imageUrl = null
+      console.log('Project created successfully:', project)
 
+      // Upload file if one was selected
       if (formData.file) {
         try {
-          const fileExt = formData.file.name.split('.').pop()
-          const fileName = `${project.id || project.projectID}_${Date.now()}.${fileExt}`
-          const filePath = `project-files/${fileName}`
-
-          const { error: uploadError } = await supabase.storage
-            .from('project-files')
-            .upload(filePath, formData.file)
-
-          if (uploadError) throw uploadError
-
-          const { data: publicUrlData } = supabase
-            .storage
-            .from('project-files')
-            .getPublicUrl(filePath)
-          imageUrl = publicUrlData.publicUrl
-
-          await supabase
-            .from('Project')
-            .update({ imageUrl })
-            .eq('id', project.id || project.projectID)
-
-          await supabase
-            .from('Media')
-            .insert({
-              filePATH: filePath, 
-              projectID: project.id || project.projectID, 
-              uploadedBy: currentUser.id 
-            })
+          const mediaRecord = await uploadFile(formData.file, project.projectID)
+          console.log('File uploaded successfully:', mediaRecord)
         } catch (fileError) {
+          // Project was created but file upload failed
           console.error('File upload failed:', fileError)
           setError(`Project created successfully, but file upload failed: ${fileError.message}`)
+          // Still consider this a partial success - redirect after showing error
           setTimeout(() => {
             navigate('/dashboard')
           }, 3000)
@@ -131,10 +143,12 @@ const ProjectForm = ({ onCancel, onSave }) => {
         }
       }
 
+      // Success! Call onSave callback if provided
       if (onSave) {
         onSave(project)
       }
 
+      // Redirect to dashboard
       navigate('/dashboard')
 
     } catch (error) {

@@ -3,7 +3,7 @@ import React from 'react';
 const ProjectModal = ({ project, darkMode, onClose }) => {
   if (!project) return null;
 
-  // Safely handle tags
+ 
   const tags = Array.isArray(project.tags)
     ? project.tags
     : typeof project.tags === 'string'
