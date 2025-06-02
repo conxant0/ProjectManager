@@ -18,17 +18,65 @@ const Dashboard = () => {
       if (data?.user) setUserId(data.user.id)
     }
     getUser()
+
+    const checkFileList = async () => {
+    const { data, error } = await supabase
+      .storage
+      .from('project-files')
+      .list('', {
+        search: '46_1748854834988',
+      });
+
+    console.log('Supabase file list result:', data);
+    if (error) console.error('Error listing files:', error);
+  };
+
+  checkFileList();
+  
   }, [])
 
   const fetchProjects = async (uid) => {
-    if (!uid) return
+    if (!uid) return;
+
     const { data, error } = await supabase
       .from('Project')
-      .select('*')
-      .eq('userID', uid)
-    if (!error) setProjects(data)
-    else console.error(error)
-  }
+      .select(`
+        *,
+        Media (
+          fileID,
+          filePATH,
+          isCover
+        )
+      `)
+      .eq('userID', uid);
+
+    if (error) {
+      console.error('Error fetching projects:', error);
+      return;
+    }
+
+    const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+
+    const projectsWithCover = data.map(project => {
+      const coverMedia = Array.isArray(project.Media)
+        ? project.Media.find(m => m.isCover)
+        : null;
+
+      const coverImage = coverMedia?.filePATH
+        ? `${SUPABASE_URL}/storage/v1/object/public/${coverMedia.filePATH}`
+        : null;
+
+      console.log('Generated coverImage URL:', coverImage);
+      console.log('coverMedia.filePATH:', coverMedia?.filePATH);
+      return {
+        ...project,
+        coverImage,
+      };
+    });
+
+    setProjects(projectsWithCover);
+  };
+
 
   useEffect(() => {
     if (userId) fetchProjects(userId)
@@ -93,16 +141,26 @@ const Dashboard = () => {
               key={project.id || i}
               onClick={() => setSelectedProject(project)}
             >
-              {project.imageUrl ? (
+              {project.coverImage ? (
                 <img
-                  src={project.imageUrl}
+                  src={project.coverImage}
+                  onError={() => console.warn('Image failed to load:', project.coverImage)}
                   alt={project.title}
                   className="project-thumbnail"
                   style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
                 />
               ) : (
-                <div className="project-thumbnail" style={{ backgroundColor: project.thumbnailColor, height: 120 }}></div>
+                <div
+                  className="project-thumbnail"
+                  style={{
+                    backgroundColor: project.thumbnailColor || '#ccc',
+                    height: 120,
+                    borderRadius: 8,
+                    marginBottom: 8
+                  }}
+                />
               )}
+
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <div className="tags">

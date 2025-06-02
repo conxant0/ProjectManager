@@ -87,26 +87,31 @@ const ProjectForm = ({ onCancel, onSave }) => {
 
   const uploadFile = async (file, projectId, isCover = false) => {
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${projectId}_${Date.now()}.${fileExt}`
-      const filePath = `project-files/${fileName}`
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${projectId}_${Date.now()}.${fileExt}`;  // just filename
 
+      // Upload path relative to the bucket (NO bucket prefix here)
+      const uploadPath = fileName;  
+
+      // Upload file to the 'project-files' bucket at path `uploadPath`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('project-files')
-        .upload(filePath, file)
+        .upload(uploadPath, file);
 
-      if (uploadError) throw uploadError
+      if (uploadError) throw uploadError;
 
-      // If it's a cover image, delete any existing one for this project
       if (isCover) {
         const { error: deleteError } = await supabase
           .from('Media')
           .delete()
           .eq('projectID', projectId)
-          .eq('isCover', true)
+          .eq('isCover', true);
 
-        if (deleteError) throw deleteError
+        if (deleteError) throw deleteError;
       }
+
+      // Compose filePATH to store in DB including bucket prefix 'project-files/'
+      const filePATH = `project-files/${uploadPath}`;
 
       const { data: mediaData, error: mediaError } = await supabase
         .from('Media')
@@ -114,19 +119,21 @@ const ProjectForm = ({ onCancel, onSave }) => {
           fileName: file.name,
           fileType: file.type,
           projectID: projectId,
-          filePATH: uploadData.path,
+          filePATH,    // store with bucket prefix
           isCover: isCover
         })
-        .select()
+        .select();
 
-      if (mediaError) throw mediaError
+      if (mediaError) throw mediaError;
 
-      return mediaData[0]
+      return mediaData[0];
     } catch (error) {
-      console.error('File upload error:', error)
-      throw new Error(`File upload failed: ${error.message}`)
+      console.error('File upload error:', error);
+      throw new Error(`File upload failed: ${error.message}`);
     }
-  }
+  };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
