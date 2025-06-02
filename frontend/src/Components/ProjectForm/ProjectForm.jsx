@@ -16,7 +16,8 @@ const ProjectForm = ({ onCancel, onSave }) => {
     tags: '',
     visibility: 'Public',
     description: '',
-    file: null,
+    coverFile: null,
+    file: [],
     tools: '',
     role: '',
     timeline: '',
@@ -57,12 +58,31 @@ const ProjectForm = ({ onCancel, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target
-    setFormData({
-      ...formData,
-      [name]: type === 'file' ? files[0] : value
-    })
+
+    if (type === 'file') {
+      const newFiles = Array.from(files)
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: [...prev[name], ...newFiles] // append new files to existing
+      }))
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
+
     // Clear any previous errors when user starts typing
     if (error) setError('')
+  }
+
+
+  const removeFile = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      file: prev.file.filter((_, index) => index !== indexToRemove)
+    }))
   }
 
   const uploadFile = async (file, projectId, isCover = false) => {
@@ -165,20 +185,20 @@ const ProjectForm = ({ onCancel, onSave }) => {
       const project = projectData[0]
       console.log('Project created successfully:', project)
 
-      // Upload file if one was selected
-      if (formData.file) {
-        try {
-          const mediaRecord = await uploadFile(formData.file, project.projectID)
-          console.log('File uploaded successfully:', mediaRecord)
-        } catch (fileError) {
-          // Project was created but file upload failed
-          console.error('File upload failed:', fileError)
-          setError(`Project created successfully, but file upload failed: ${fileError.message}`)
-          // Still consider this a partial success - redirect after showing error
-          setTimeout(() => {
-            navigate('/dashboard')
-          }, 3000)
-          return
+      if (formData.coverFile) {
+        await uploadFile(formData.coverFile, project.projectID, true); // isCover = true
+      }
+
+      if (formData.file && formData.file.length > 0) {
+        for (const file of formData.file) {
+          try {
+            const mediaRecord = await uploadFile(file, project.projectID)
+            console.log('File uploaded successfully:', mediaRecord)
+          } catch (fileError) {
+            console.error('File upload failed:', fileError)
+            setError(`Project created, but one file upload failed: ${fileError.message}`)
+            // You could continue uploading others, or break out of the loop if you want
+          }
         }
       }
 
@@ -299,8 +319,10 @@ const ProjectForm = ({ onCancel, onSave }) => {
       />
 
       <input
+        id="cover-upload"
         type="file"
         accept=".jpg,.jpeg,.png"
+        style={{ display: 'none' }}
         onChange={(e) =>
           setFormData((prev) => ({
             ...prev,
@@ -308,25 +330,48 @@ const ProjectForm = ({ onCancel, onSave }) => {
           }))
         }
       />
-      <label className="file-upload-label">
+
+      <label htmlFor="cover-upload" className="file-upload-label">
         {formData.coverFile
           ? `Selected: ${formData.coverFile.name}`
           : '+ Upload Cover Photo (JPG, PNG)'}
       </label>
 
-
-      <label htmlFor="file-upload" className="file-upload-label">
-        {formData.file ? `Selected: ${formData.file.name}` : '+ Upload File (JPG, PNG, PDF)'}
+      {/* Trigger to open file picker */}
+      <label htmlFor="file-upload" className="file-upload-label cursor-pointer">
+        + Upload File (JPG, PNG, PDF)
       </label>
+
+      {/* Hidden file input */}
       <input
         id="file-upload"
         type="file"
         name="file"
+        multiple
         onChange={handleChange}
         accept=".jpg,.jpeg,.png,.pdf"
         style={{ display: 'none' }}
         disabled={isLoading}
       />
+
+      {/* List of selected files */}
+      {formData.file.length > 0 && (
+        <ul className="mt-2">
+          {formData.file.map((f, idx) => (
+            <li key={idx} className="flex items-center gap-2">
+              <span>{f.name}</span>
+              <button
+                type="button"
+                className="text-red-500 hover:underline"
+                onClick={() => removeFile(idx)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
 
       <h3>Project Highlights</h3>
       <input 
