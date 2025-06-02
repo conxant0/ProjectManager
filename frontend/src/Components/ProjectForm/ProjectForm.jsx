@@ -65,28 +65,37 @@ const ProjectForm = ({ onCancel, onSave }) => {
     if (error) setError('')
   }
 
-  const uploadFile = async (file, projectId) => {
+  const uploadFile = async (file, projectId, isCover = false) => {
     try {
-      // Create unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${projectId}_${Date.now()}.${fileExt}`
       const filePath = `project-files/${fileName}`
 
-      // Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('project-files')
         .upload(filePath, file)
 
       if (uploadError) throw uploadError
 
-      // Insert file record into Media table
+      // If it's a cover image, delete any existing one for this project
+      if (isCover) {
+        const { error: deleteError } = await supabase
+          .from('Media')
+          .delete()
+          .eq('projectID', projectId)
+          .eq('isCover', true)
+
+        if (deleteError) throw deleteError
+      }
+
       const { data: mediaData, error: mediaError } = await supabase
         .from('Media')
         .insert({
           fileName: file.name,
           fileType: file.type,
           projectID: projectId,
-          filePATH: uploadData.path
+          filePATH: uploadData.path,
+          isCover: isCover
         })
         .select()
 
@@ -288,6 +297,23 @@ const ProjectForm = ({ onCancel, onSave }) => {
         placeholder="Describe your project..."
         disabled={isLoading}
       />
+
+      <input
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            coverFile: e.target.files[0],
+          }))
+        }
+      />
+      <label className="file-upload-label">
+        {formData.coverFile
+          ? `Selected: ${formData.coverFile.name}`
+          : '+ Upload Cover Photo (JPG, PNG)'}
+      </label>
+
 
       <label htmlFor="file-upload" className="file-upload-label">
         {formData.file ? `Selected: ${formData.file.name}` : '+ Upload File (JPG, PNG, PDF)'}
