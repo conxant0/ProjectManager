@@ -288,6 +288,7 @@ const ProjectForm = ({ onCancel, onSave }) => {
             <option value="">Select</option>
             <option value="Ongoing">Ongoing</option>
             <option value="Completed">Completed</option>
+            <option value="Idea">Idea</option>
           </select>
         </div>
       </div>

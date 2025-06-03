@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
 import supabase from '../../helper/supabaseClient'
-import ProjectModal from './ProjectModal'
+import ProjectModal from './ProjectModal';
+
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -182,11 +183,9 @@ const Dashboard = () => {
           project={selectedProject}
           darkMode={darkMode}
           onClose={() => setSelectedProject(null)}
-          onDelete={() => {
-            setSelectedProject(null); // Close modal
-            if (userId) fetchProjects(userId); // Refresh projects
-          }}
+          onProjectUpdate={() => fetchProjects(userId)}
         />
+
       </main>
     </div>
   )
