@@ -178,13 +178,11 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-            darkMode={darkMode}
-            onClose={() => setSelectedProject(null)}
-          />
-        )}
+        <ProjectModal
+          project={selectedProject}
+          darkMode={darkMode}
+          onClose={() => setSelectedProject(null)}
+        />
       </main>
     </div>
   )
