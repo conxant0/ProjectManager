@@ -182,6 +182,10 @@ const Dashboard = () => {
           project={selectedProject}
           darkMode={darkMode}
           onClose={() => setSelectedProject(null)}
+          onDelete={() => {
+            setSelectedProject(null); // Close modal
+            if (userId) fetchProjects(userId); // Refresh projects
+          }}
         />
       </main>
     </div>

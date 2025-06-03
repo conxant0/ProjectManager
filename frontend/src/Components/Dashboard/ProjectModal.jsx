@@ -1,13 +1,43 @@
 import React from 'react';
+import { FaTrash } from 'react-icons/fa';
+import supabase from '../../helper/supabaseClient';
 import './ProjectModal.css';
 
-
-const ProjectModal = ({ project, darkMode, onClose }) => {
+const ProjectModal = ({ project, darkMode, onClose, onDelete }) => {
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains('modal-overlay')) {
       onClose();
     }
   };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${project.title}"?`);
+    if (!confirmDelete) return;
+
+    if (!project.projectID) {
+      console.error('No projectID found for deletion.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('Project')
+        .delete()
+        .eq('projectID', project.projectID);
+
+      if (error) {
+        console.error('Failed to delete project:', error.message);
+      } else {
+        onClose(); // Close the modal
+        if (typeof onDelete === 'function') {
+          onDelete(); // Trigger dashboard refresh
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error during delete:', err);
+    }
+  };
+
 
   if (!project) return null;
 
@@ -57,6 +87,12 @@ const ProjectModal = ({ project, darkMode, onClose }) => {
               <a href={project.notionURL} target="_blank" rel="noopener noreferrer">{project.notionURL}</a>
             ) : '-'}
           </p>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button className="delete-btn" onClick={handleDelete}>
+            <FaTrash style={{ marginRight: '6px' }} />
+            Delete
+          </button>
         </div>
       </div>
     </div>
