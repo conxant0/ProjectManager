@@ -12,6 +12,7 @@ import SignUpForm from './Components/SignUpForm/SignUpForm';
 import Dashboard from './Components/Dashboard/Dashboard';
 import Profile from './Components/Profile/Profile';
 import ProjectForm from './Components/ProjectForm/ProjectForm';
+import PublicProfile from './Components/ShareableInfo/PublicProfile'; 
 import supabase from './helper/supabaseClient';
 
 // ProjectForm wrapper to support onCancel and onSave
@@ -73,6 +74,10 @@ function App() {
         <Route
           path="/add-project"
           element={session ? <ProjectFormWrapper /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/u/:username"
+          element={<PublicProfile />}
         />
       </Routes>
     </Router>

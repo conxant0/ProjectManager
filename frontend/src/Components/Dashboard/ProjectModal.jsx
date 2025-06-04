@@ -5,7 +5,7 @@ import './ProjectModal.css';
 
 const CATEGORIES = ['Design', 'Development'];
 const STATUSES = ['Completed', 'Ongoing', 'Idea'];
-const VISIBILITIES = ['public', 'private', 'archived'];
+const VISIBILITIES = ['Public', 'Private', 'Archived'];
 
 const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -26,7 +26,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           : typeof project.tags === 'string' 
             ? project.tags 
             : '',
-        visibility: project.visibility || 'public',
+        visibility: project.visibility || 'Public',
         tools: project.tools || '',
         role: project.role || '',
         timeline: project.timeline || '',
@@ -107,7 +107,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         description: form.description?.trim() || '',
         category: form.category || 'Design',
         status: form.status || 'Idea',
-        visibility: form.visibility || 'public',
+        visibility: form.visibility || 'Public',
         tags: form.tags ? form.tags.split(',').map(tag => tag.trim()).filter(tag => tag).join(',') : '',
         tools: form.tools?.trim() || '',
         role: form.role?.trim() || '',
@@ -181,7 +181,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         : typeof project.tags === 'string' 
           ? project.tags 
           : '',
-      visibility: project.visibility || 'public',
+      visibility: project.visibility || 'Public',
       tools: project.tools || '',
       role: project.role || '',
       timeline: project.timeline || '',

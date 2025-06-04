@@ -5,19 +5,19 @@ import { FaEnvelope, FaLock } from "react-icons/fa"
 import { useNavigate } from 'react-router-dom'
 
 const SignUpForm = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
-  e.preventDefault();
-  setError(null);
-  setSuccess(null);
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -34,12 +34,11 @@ const SignUpForm = () => {
       return;
     }
 
-    // Insert into your custom User table
     const { error: insertError } = await supabase.from('User').insert([
       {
-        userID,  // case-sensitive column name
-        name,
-        email,   // make sure to store email too
+        userID,
+        username,
+        email,
       },
     ]);
 
@@ -53,47 +52,45 @@ const SignUpForm = () => {
     console.log('User signed up and saved:', signUpData.user);
   };
 
-
-
-   const handleLoginClick = () => {
-    navigate('/login'); 
+  const handleLoginClick = () => {
+    navigate('/login');
   };
-
 
   return (
     <div className="wrapper">
       <form onSubmit={handleSignUp}>
         <h1>Sign Up</h1>
+
         <div className="input-box">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <FaEnvelope className='icon' />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <FaEnvelope className='icon' />
         </div>
 
         <div className="input-box">
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </div>
 
         <div className="input-box">
-        <input
-          type="password"
-          placeholder="Password (6 or More Characters)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <FaLock className='icon' />
+          <input
+            type="password"
+            placeholder="Password (6 or More Characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <FaLock className='icon' />
         </div>
 
         <div className="remember-forgot">
@@ -106,18 +103,16 @@ const SignUpForm = () => {
         {success && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
 
         <div className="register-link">
-          <p>Already have an account? <a href="/login" onClick={(e) => {
-          e.preventDefault(); 
-          handleLoginClick();
-        }}>
-          Login
-        </a>
-      </p>
+          <p>
+            Already have an account? <a href="/login" onClick={(e) => {
+              e.preventDefault();
+              handleLoginClick();
+            }}>Login</a>
+          </p>
         </div>
-
       </form>
     </div>
-  )
+  );
 }
 
-export default SignUpForm
+export default SignUpForm;

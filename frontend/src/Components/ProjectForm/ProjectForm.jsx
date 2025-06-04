@@ -203,7 +203,8 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
             timeline: formData.timeline.trim(),
             githubURL: formData.githubURL.trim(),
             figmaURL: formData.figmaURL.trim(),
-            notionURL: formData.notionURL.trim()
+            notionURL: formData.notionURL.trim(),
+            userID: currentUser.id 
           })
           .select()
   
