@@ -91,8 +91,15 @@
 .project-form input:focus,
 .project-form select:focus,
 .project-form textarea:focus {
-  border: 1.5px solid #1976d2;
-  box-shadow: 0 0 0 2px #1976d2;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.project-form select:focus,
+.project-form .selected {
+  color: #fff;
+  background: #232323;
+  border-color: #fff;
 }
 
 .project-form textarea {
@@ -128,7 +135,7 @@
 .project-form .visibility-options button:focus {
   background: #fff;
   color: #232323;
-  border: 1.5px solid #1976d2;
+  border: 1.5px solid #232323;
 }
 
 .file-upload-label {
@@ -206,8 +213,8 @@
 .dashboard-fullscreen.dark .project-form input:focus,
 .dashboard-fullscreen.dark .project-form select:focus,
 .dashboard-fullscreen.dark .project-form textarea:focus {
-  border: 1.5px solid #90caf9;
-  box-shadow: 0 0 0 2px #90caf9;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 .project-form.dark label,
@@ -277,6 +284,7 @@
   margin-top: 2rem;
   justify-content: flex-end;
 }
+
 .save-btn, .cancel-btn {
   background: #232323;
   color: #fff;
@@ -290,18 +298,7 @@
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.10);
 }
-.save-btn:hover, .cancel-btn:hover {
-  background: #1976d2;
-  color: #fff;
-}
-.cancel-btn {
-  background: #bbb;
-  color: #232323;
-}
-.cancel-btn:hover {
-  background: #232323;
-  color: #fff;
-}
+
 
 /* Error message styling */
 .error-message {
@@ -458,7 +455,5 @@
   background: #eee;
 }
 
-.save-btn {
-  background: #000;
-  color: white;
-}
+
+
