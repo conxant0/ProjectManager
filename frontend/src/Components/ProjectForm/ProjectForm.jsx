@@ -3,28 +3,28 @@ import { useNavigate } from 'react-router-dom'
 import supabase from '../../helper/supabaseClient'
 import './ProjectForm.css'
 
-const ProjectForm = ({ onCancel, onSave }) => {
+const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [currentUser, setCurrentUser] = useState(null)
   
   const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    status: '',
-    tags: '',
-    visibility: 'Public',
-    description: '',
-    coverFile: null,
-    file: [],
-    tools: '',
-    role: '',
-    timeline: '',
-    githubURL: '',
-    figmaURL: '',
-    notionURL: ''
-  })
+    title: initialData?.title || '',
+    category: initialData?.category || '',
+    status: initialData?.status || '',
+    tags: initialData?.tags || '',
+    visibility: initialData?.visibility || 'Public',
+    description: initialData?.description || '',
+    coverFile: null, // User uploads new one if needed
+    file: [],        // New files to upload
+    tools: initialData?.tools || '',
+    role: initialData?.role || '',
+    timeline: initialData?.timeline || '',
+    githubURL: initialData?.githubURL || '',
+    figmaURL: initialData?.figmaURL || '',
+    notionURL: initialData?.notionURL || ''
+  })  
 
   // Get current user on component mount
   useEffect(() => {
@@ -133,97 +133,122 @@ const ProjectForm = ({ onCancel, onSave }) => {
     }
   };
 
-
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // Validation
-    if (!currentUser) {
-      setError('You must be logged in to create a project')
-      return
-    }
-
-    if (!formData.title.trim()) {
-      setError('Project title is required')
-      return
-    }
-
-    // URL validation for optional fields
-    const urlFields = [
-      { field: 'githubURL', name: 'GitHub URL' },
-      { field: 'figmaURL', name: 'Figma URL' },
-      { field: 'notionURL', name: 'Notion URL' }
-    ]
-
-    for (const { field, name } of urlFields) {
-      if (formData[field].trim() && !isValidURL(formData[field].trim())) {
-        setError(`Please enter a valid ${name}`)
-        return
-      }
-    }
-
     setIsLoading(true)
-    setError('')
-
+    setError(null)
+  
     try {
-      // Insert project into database
-      const { data: projectData, error: projectError } = await supabase
-        .from('Project')
-        .insert({
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          status: formData.status,
-          category: formData.category,
-          tags: formData.tags.trim(),
-          visibility: formData.visibility,
-          tools: formData.tools.trim(),
-          role: formData.role.trim(),
-          timeline: formData.timeline.trim(),
-          githubURL: formData.githubURL.trim() || null,
-          figmaURL: formData.figmaURL.trim() || null,
-          notionURL: formData.notionURL.trim() || null,
-          userID: currentUser.id
-        })
-        .select()
-
-      if (projectError) throw projectError
-
-      const project = projectData[0]
-      console.log('Project created successfully:', project)
-
-      if (formData.coverFile) {
-        await uploadFile(formData.coverFile, project.projectID, true); // isCover = true
+      // Validation
+      if (
+        !formData.title.trim() ||
+        !formData.category ||
+        !formData.status ||
+        !formData.visibility ||
+        !formData.description.trim()
+      ) {
+        throw new Error('Please fill in all required fields')
       }
-
-      if (formData.file && formData.file.length > 0) {
-        for (const file of formData.file) {
-          try {
-            const mediaRecord = await uploadFile(file, project.projectID)
-            console.log('File uploaded successfully:', mediaRecord)
-          } catch (fileError) {
-            console.error('File upload failed:', fileError)
-            setError(`Project created, but one file upload failed: ${fileError.message}`)
-            // You could continue uploading others, or break out of the loop if you want
-          }
+  
+      // URL validation
+      const urlFields = ['githubURL', 'figmaURL', 'notionURL']
+      for (const field of urlFields) {
+        const url = formData[field].trim()
+        if (url && !/^https?:\/\/\S+$/.test(url)) {
+          throw new Error(`Invalid URL in ${field}`)
         }
       }
-
-      // Success! Call onSave callback if provided
-      if (onSave) {
-        onSave(project)
+  
+      // 🔑 Step 1: Declare projectId
+      let projectId
+  
+      // ✍️ Step 2: Update if editing, else insert
+      if (initialData) {
+        // Edit mode
+        projectId = initialData.projectID
+  
+        const { error: updateError } = await supabase
+          .from('Project')
+          .update({
+            title: formData.title.trim(),
+            category: formData.category,
+            status: formData.status,
+            tags: formData.tags.trim(),
+            visibility: formData.visibility,
+            description: formData.description.trim(),
+            tools: formData.tools.trim(),
+            role: formData.role.trim(),
+            timeline: formData.timeline.trim(),
+            githubURL: formData.githubURL.trim(),
+            figmaURL: formData.figmaURL.trim(),
+            notionURL: formData.notionURL.trim()
+          })
+          .eq('projectID', projectId)
+  
+        if (updateError) throw updateError
+  
+      } else {
+        // Create mode
+        const { data, error: insertError } = await supabase
+          .from('Project')
+          .insert({
+            title: formData.title.trim(),
+            category: formData.category,
+            status: formData.status,
+            tags: formData.tags.trim(),
+            visibility: formData.visibility,
+            description: formData.description.trim(),
+            tools: formData.tools.trim(),
+            role: formData.role.trim(),
+            timeline: formData.timeline.trim(),
+            githubURL: formData.githubURL.trim(),
+            figmaURL: formData.figmaURL.trim(),
+            notionURL: formData.notionURL.trim()
+          })
+          .select()
+  
+        if (insertError) throw insertError
+  
+        // ⚠️ Get the newly created ID
+        projectId = data[0].projectID
       }
-
-      // Redirect to dashboard
-      navigate('/dashboard')
-
-    } catch (error) {
-      console.error('Error creating project:', error)
-      setError(`Failed to create project: ${error.message}`)
+  
+      // 🖼 Step 3: Handle media uploads (same as before)
+      if (formData.coverFile) {
+        await uploadFile(formData.coverFile, projectId, true)
+      }
+  
+      if (formData.file.length > 0) {
+        for (const file of formData.file) {
+          await uploadFile(file, projectId, false)
+        }
+      }
+  
+      onSave()
+      setFormData({
+        title: '',
+        category: '',
+        status: '',
+        tags: '',
+        visibility: 'Public',
+        description: '',
+        coverFile: null,
+        file: [],
+        tools: '',
+        role: '',
+        timeline: '',
+        githubURL: '',
+        figmaURL: '',
+        notionURL: ''
+      })
+    } catch (err) {
+      console.error('Submission error:', err)
+      setError(err.message)
     } finally {
       setIsLoading(false)
     }
   }
+  
 
   const handleCancel = () => {
     if (onCancel) {
