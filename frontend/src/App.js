@@ -14,6 +14,7 @@ import Profile from './Components/Profile/Profile';
 import ProjectForm from './Components/ProjectForm/ProjectForm';
 import PublicProfile from './Components/ShareableInfo/PublicProfile'; 
 import supabase from './helper/supabaseClient';
+import { ThemeProvider } from './ThemeContext';
 
 // ProjectForm wrapper to support onCancel and onSave
 const ProjectFormWrapper = () => {
@@ -30,6 +31,7 @@ const ProjectFormWrapper = () => {
 
   return <ProjectForm onCancel={handleCancel} onSave={handleSave} />;
 };
+
 
 function App() {
   const [session, setSession] = useState(null);
@@ -49,38 +51,40 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={session ? <Navigate to="/dashboard" /> : <LoginForm />}
-        />
-        <Route
-          path="/login"
-          element={session ? <Navigate to="/dashboard" /> : <LoginForm />}
-        />
-        <Route
-          path="/signup"
-          element={session ? <Navigate to="/dashboard" /> : <SignUpForm />}
-        />
-        <Route
-          path="/dashboard"
-          element={session ? <Dashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/profile"
-          element={session ? <Profile /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/add-project"
-          element={session ? <ProjectFormWrapper /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/u/:username"
-          element={<PublicProfile />}
-        />
-      </Routes>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={session ? <Navigate to="/dashboard" /> : <LoginForm />}
+          />
+          <Route
+            path="/login"
+            element={session ? <Navigate to="/dashboard" /> : <LoginForm />}
+          />
+          <Route
+            path="/signup"
+            element={session ? <Navigate to="/dashboard" /> : <SignUpForm />}
+          />
+          <Route
+            path="/dashboard"
+            element={session ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile"
+            element={session ? <Profile /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/add-project"
+            element={session ? <ProjectFormWrapper /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/u/:username"
+            element={<PublicProfile />}
+          />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 

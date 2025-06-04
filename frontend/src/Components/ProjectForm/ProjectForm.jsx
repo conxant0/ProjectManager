@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { useTheme } from '../../ThemeContext';
 import { useNavigate } from 'react-router-dom'
 import supabase from '../../helper/supabaseClient'
 import './ProjectForm.css'
 
 const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [currentUser, setCurrentUser] = useState(null)
-  
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const { darkMode } = useTheme();
+
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     category: initialData?.category || '',
@@ -26,7 +28,6 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
     notionURL: initialData?.notionURL || ''
   })  
 
-  // Get current user on component mount
   useEffect(() => {
     getCurrentUser()
   }, [])
@@ -264,216 +265,218 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
   }
 
   return (
-    <form className="project-form" onSubmit={handleSubmit}>
-      <h2>New Project</h2>
+    <div className={`project-form-bg-blur${darkMode ? ' dark' : ' light'}`}> 
+      <form className={`project-form${darkMode ? ' dark' : ''}`} onSubmit={handleSubmit}>
+        <h2>New Project</h2>
 
-      {error && (
-        <div className="error-message" style={{ 
-          color: 'red', 
-          padding: '10px', 
-          marginBottom: '15px', 
-          border: '1px solid red', 
-          borderRadius: '4px',
-          backgroundColor: '#ffe6e6'
-        }}>
-          {error}
+        {error && (
+          <div className="error-message" style={{ 
+            color: 'red', 
+            padding: '10px', 
+            marginBottom: '15px', 
+            border: '1px solid red', 
+            borderRadius: '4px',
+            backgroundColor: '#ffe6e6'
+          }}>
+            {error}
+          </div>
+        )}
+
+        <label>Project Title *</label>
+        <input 
+          name="title" 
+          value={formData.title} 
+          onChange={handleChange} 
+          required 
+          disabled={isLoading}
+        />
+
+        <div className="row">
+          <div>
+            <label>Category</label>
+            <select 
+              name="category" 
+              value={formData.category} 
+              onChange={handleChange}
+              disabled={isLoading}
+            >
+              <option value="">Select</option>
+              <option value="Design">Design</option>
+              <option value="Development">Development</option>
+            </select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select 
+              name="status" 
+              value={formData.status} 
+              onChange={handleChange}
+              disabled={isLoading}
+            >
+              <option value="">Select</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+              <option value="Idea">Idea</option>
+            </select>
+          </div>
         </div>
-      )}
 
-      <label>Project Title *</label>
-      <input 
-        name="title" 
-        value={formData.title} 
-        onChange={handleChange} 
-        required 
-        disabled={isLoading}
-      />
+        <label>Tags</label>
+        <input 
+          name="tags" 
+          value={formData.tags} 
+          onChange={handleChange} 
+          placeholder="e.g., React, UI/UX, Mobile"
+          disabled={isLoading}
+        />
 
-      <div className="row">
-        <div>
-          <label>Category *</label>
-          <select 
-            name="category" 
-            value={formData.category} 
-            onChange={handleChange}
-            disabled={isLoading}
-          >
-            <option value="">Select</option>
-            <option value="Design">Design</option>
-            <option value="Development">Development</option>
-          </select>
-        </div>
-        <div>
-          <label>Status *</label>
-          <select 
-            name="status" 
-            value={formData.status} 
-            onChange={handleChange}
-            disabled={isLoading}
-          >
-            <option value="">Select</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Completed">Completed</option>
-            <option value="Idea">Idea</option>
-          </select>
-        </div>
-      </div>
-
-      <label>Tags</label>
-      <input 
-        name="tags" 
-        value={formData.tags} 
-        onChange={handleChange} 
-        placeholder="e.g., React, UI/UX, Mobile"
-        disabled={isLoading}
-      />
-
-      <label>Visibility</label>
-      <div className="visibility-options">
-        {['Public', 'Private', 'Archived'].map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={formData.visibility === v ? 'selected' : ''}
-            onClick={() => setFormData({ ...formData, visibility: v })}
-            disabled={isLoading}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
-
-      <label>Description *</label>
-      <textarea 
-        name="description" 
-        value={formData.description} 
-        onChange={handleChange}
-        placeholder="Describe your project..."
-        disabled={isLoading}
-      />
-
-      <input
-        id="cover-upload"
-        type="file"
-        accept=".jpg,.jpeg,.png"
-        style={{ display: 'none' }}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            coverFile: e.target.files[0],
-          }))
-        }
-      />
-
-      <label htmlFor="cover-upload" className="file-upload-label">
-        {formData.coverFile
-          ? `Selected: ${formData.coverFile.name}`
-          : '+ Upload Cover Photo (JPG, PNG)'}
-      </label>
-
-      {/* Trigger to open file picker */}
-      <label htmlFor="file-upload" className="file-upload-label cursor-pointer">
-        + Upload File (JPG, PNG, PDF)
-      </label>
-
-      {/* Hidden file input */}
-      <input
-        id="file-upload"
-        type="file"
-        name="file"
-        multiple
-        onChange={handleChange}
-        accept=".jpg,.jpeg,.png,.pdf"
-        style={{ display: 'none' }}
-        disabled={isLoading}
-      />
-
-      {/* List of selected files */}
-      {formData.file.length > 0 && (
-        <ul className="mt-2">
-          {formData.file.map((f, idx) => (
-            <li key={idx} className="flex items-center gap-2">
-              <span>{f.name}</span>
-              <button
-                type="button"
-                className="text-red-500 hover:underline"
-                onClick={() => removeFile(idx)}
-              >
-                Remove
-              </button>
-            </li>
+        <label>Visibility</label>
+        <div className="visibility-options">
+          {['Public', 'Private', 'Archived'].map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={formData.visibility === v ? 'selected' : ''}
+              onClick={() => setFormData({ ...formData, visibility: v })}
+              disabled={isLoading}
+            >
+              {v}
+            </button>
           ))}
-        </ul>
-      )}
+        </div>
 
-
-      <h3>Project Highlights</h3>
-      <input 
-        placeholder="Tools Used (e.g., Figma, React, Node.js)" 
-        name="tools" 
-        value={formData.tools} 
-        onChange={handleChange}
-        disabled={isLoading}
-      />
-      <input 
-        placeholder="Your Role (e.g., Lead Developer, UI Designer)" 
-        name="role" 
-        value={formData.role} 
-        onChange={handleChange}
-        disabled={isLoading}
-      />
-      <input 
-        placeholder="Timeline (e.g., 2 months, Jan-Mar 2024)" 
-        name="timeline" 
-        value={formData.timeline} 
-        onChange={handleChange}
-        disabled={isLoading}
-      />
-
-      <h3>Project Links</h3>
-      <input 
-        placeholder="GitHub Repository URL (optional)" 
-        name="githubURL" 
-        value={formData.githubURL} 
-        onChange={handleChange}
-        disabled={isLoading}
-        type="url"
-      />
-      <input 
-        placeholder="Figma Design URL (optional)" 
-        name="figmaURL" 
-        value={formData.figmaURL} 
-        onChange={handleChange}
-        disabled={isLoading}
-        type="url"
-      />
-      <input 
-        placeholder="Notion Documentation URL (optional)" 
-        name="notionURL" 
-        value={formData.notionURL} 
-        onChange={handleChange}
-        disabled={isLoading}
-        type="url"
-      />
-
-      <div className="form-buttons">
-        <button 
-          type="button" 
-          onClick={handleCancel} 
-          className="cancel-btn"
+        <label>Description</label>
+        <textarea 
+          name="description" 
+          value={formData.description} 
+          onChange={handleChange}
+          placeholder="Describe your project..."
           disabled={isLoading}
-        >
-          Cancel
-        </button>
-        <button 
-          type="submit" 
-          className="save-btn"
+        />
+
+        <input
+          id="cover-upload"
+          type="file"
+          accept=".jpg,.jpeg,.png"
+          style={{ display: 'none' }}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              coverFile: e.target.files[0],
+            }))
+          }
+        />
+
+        <label htmlFor="cover-upload" className="file-upload-label">
+          {formData.coverFile
+            ? `Selected: ${formData.coverFile.name}`
+            : '+ Upload Cover Photo (JPG, PNG)'}
+        </label>
+
+        {/* Trigger to open file picker */}
+        <label htmlFor="file-upload" className="file-upload-label cursor-pointer">
+          + Upload File (JPG, PNG, PDF)
+        </label>
+
+        {/* Hidden file input */}
+        <input
+          id="file-upload"
+          type="file"
+          name="file"
+          multiple
+          onChange={handleChange}
+          accept=".jpg,.jpeg,.png,.pdf"
+          style={{ display: 'none' }}
           disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : 'Save Project'}
-        </button>
-      </div>
-    </form>
+        />
+
+        {/* List of selected files */}
+        {formData.file.length > 0 && (
+          <ul className="mt-2">
+            {formData.file.map((f, idx) => (
+              <li key={idx} className="flex items-center gap-2">
+                <span>{f.name}</span>
+                <button
+                  type="button"
+                  className="text-red-500 hover:underline"
+                  onClick={() => removeFile(idx)}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+
+        <h3>Project Highlights</h3>
+        <input 
+          placeholder="Tools Used (e.g., Figma, React, Node.js)" 
+          name="tools" 
+          value={formData.tools} 
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <input 
+          placeholder="Your Role (e.g., Lead Developer, UI Designer)" 
+          name="role" 
+          value={formData.role} 
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+        <input 
+          placeholder="Timeline (e.g., 2 months, Jan-Mar 2024)" 
+          name="timeline" 
+          value={formData.timeline} 
+          onChange={handleChange}
+          disabled={isLoading}
+        />
+
+        <h3>Project Links</h3>
+        <input 
+          placeholder="GitHub Repository URL (optional)" 
+          name="githubURL" 
+          value={formData.githubURL} 
+          onChange={handleChange}
+          disabled={isLoading}
+          type="url"
+        />
+        <input 
+          placeholder="Figma Design URL (optional)" 
+          name="figmaURL" 
+          value={formData.figmaURL} 
+          onChange={handleChange}
+          disabled={isLoading}
+          type="url"
+        />
+        <input 
+          placeholder="Notion Documentation URL (optional)" 
+          name="notionURL" 
+          value={formData.notionURL} 
+          onChange={handleChange}
+          disabled={isLoading}
+          type="url"
+        />
+
+        <div className="form-buttons">
+          <button 
+            type="button" 
+            onClick={handleCancel} 
+            className="cancel-btn"
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            className="save-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Saving...' : 'Save Project'}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
 

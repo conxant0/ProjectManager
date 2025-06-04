@@ -1,3 +1,168 @@
+.gallery-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.gallery-remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 20px;
+  text-align: center;
+  padding: 0;
+  z-index: 2;
+}
+
+.gallery-add-label {
+  display: inline-block;
+  width: 120px;
+  height: 90px;
+  border: 2px dashed #aaa;
+  border-radius: 6px;
+  text-align: center;
+  line-height: 90px;
+  color: #888;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.modal-select {
+  margin-left: 8px;
+  padding: 4px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.modal-select.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.modal-input-short {
+  margin-left: 8px;
+  padding: 4px;
+  width: 60%;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.modal-input-short.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+.cover-image-upload-section {
+  margin: 12px 0;
+}
+
+.cover-image-upload-input {
+  width: 100%;
+  padding: 4px;
+  margin-top: 4px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.cover-image-upload-input.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.modal-header-buttons {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.modal-title-edit-section {
+  margin: 12px 0;
+}
+.modal-title-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.modal-title-input.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.modal-description-edit-section {
+  margin: 12px 0;
+}
+.modal-description-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+.modal-description-input.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.project-highlights-section {
+  margin: 12px 0;
+}
+.project-highlights-input {
+  margin-left: 8px;
+  padding: 4px;
+  width: 60%;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.project-highlights-input.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.project-links-section {
+  margin: 12px 0;
+}
+.project-links-input {
+  margin-left: 8px;
+  padding: 4px;
+  width: 60%;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.project-links-input.dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.modal-action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+.modal-action-edit-buttons {
+  display: flex;
+  gap: 8px;
+}
 .modal {
   background-color: white;
   color: black;
@@ -109,32 +274,33 @@
   background-color: #c0392b;
 }
 
-.edit-btn {
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
+.project-gallery-section {
+  width: 100%;
+  margin: 24px 0 0 0;
+}
+
+.project-gallery-title {
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.modal.dark .project-gallery-title {
+  color: #90caf9;
+}
+
+.project-gallery-images {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-start;
 }
 
-.edit-btn:hover {
-  background-color: #e0e0e0;
-  transform: scale(1.1) rotate(5deg);
-}
-
-.edit-btn.editing {
-  background-color: #ffd1d1;
-  transform: scale(1.1) rotate(-5deg);
-}
-
-.edit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.project-gallery-image {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
