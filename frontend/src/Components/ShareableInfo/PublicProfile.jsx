@@ -71,6 +71,10 @@ const PublicProfile = () => {
 
               return (
                 <div className="project-card" key={project.projectID}>
+                  <div className="status-container">
+                    <span className="badge status-badge">{project.status}</span>
+                  </div>
+
                   <h3>{project.title}</h3>
                   <p>{project.description}</p>
 
@@ -90,6 +94,7 @@ const PublicProfile = () => {
                 </div>
               )
             })}
+
           </div>
         )}
       </section>

@@ -1,0 +1,35 @@
+/* Container to help with spacing above title */
+.status-container {
+  margin-bottom: 0.5rem;
+}
+
+/* Reuse your existing .badge styling, but override for status if needed */
+.status-badge {
+  /* If .badge already has padding, background, border-radius, etc., you can skip or override only the color. 
+     Otherwise, uncomment all of these lines and tweak to taste. */
+
+  /* Example overrides: */
+   background-color: #e0e7ff;  /* light indigo-ish bg */ 
+   color: #3730a3;            /* dark indigo text */ 
+   padding: 2px 8px;          /* smaller pill padding */ 
+   border-radius: 12px;       /* pill shape */ 
+   font-size: 0.75rem;        /* a bit smaller than project title */ 
+   display: inline-block;     /* shrink to fit */ 
+
+  /* If your existing .badge is working fine (colors, padding, etc.), you can simply do: */
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* If you need to define .badge from scratch (in case you don’t already have it), here’s a quick example: */
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background-color: #f3f4f6;  /* light gray background */
+  color: #374151;            /* dark gray text */
+}
+
