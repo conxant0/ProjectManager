@@ -21,7 +21,7 @@ export const fetchPublicProfile = async (username) => {
     .from('Profile')
     .select('ProfileID, name, bio, skills, username')
     .eq('"userID"', userId)
-    .single()
+    .maybeSingle()
 
   if (profileError || !profileData) {
     console.error('Profile not found or error:', profileError)
