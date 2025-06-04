@@ -260,7 +260,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         {/* Header Buttons */}
         <div className="modal-header-buttons">
           <button 
-            className="edit-btn"
+            className={`edit-btn ${isEditing ? 'editing' : ''}`}
             onClick={() => setIsEditing(!isEditing)}
             disabled={loading}
             title={isEditing ? "Cancel Edit" : "Edit Project"}
@@ -269,6 +269,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           </button>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
+
 
         {/* Title */}
         {isEditing ? (
@@ -575,10 +576,15 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
             <div></div>
           )}
           
-          <button className="delete-btn" onClick={handleDelete}>
+          <button
+            className="delete-btn"
+            onClick={handleDelete}
+            style={{ marginLeft: '8px' }} // Add left gap here
+          >
             <FaTrash style={{ marginRight: '6px' }} />
             Delete
           </button>
+
         </div>
       </div>
     </div>
