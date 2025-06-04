@@ -34,6 +34,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* ---------- Global Styles ---------- */
 body {
   margin: 0;
   padding: 0;
@@ -43,7 +44,6 @@ body {
 
 .profile-container {
   min-height: 100vh;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,6 +57,7 @@ body {
   color: var(--text-light);
 }
 
+/* ---------- Header Section ---------- */
 .toggle-buttons {
   display: flex;
   justify-content: flex-end;
@@ -80,10 +81,10 @@ body {
 }
 
 .profile-header {
-  position: relative;
   width: 100%;
   max-width: 1200px;
   height: 300px;
+  position: relative;
   overflow: visible;
   border-radius: var(--radius);
 }
@@ -95,6 +96,7 @@ body {
   filter: grayscale(100%);
 }
 
+/* ---------- Profile Top ---------- */
 .profile-top {
   position: absolute;
   bottom: -80px;
@@ -118,7 +120,6 @@ body {
   object-fit: cover;
   background: #eee;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 3;
 }
 
 .edit-icon-overlay {
@@ -137,16 +138,14 @@ body {
   display: block;
 }
 
+/* ---------- Profile Name ---------- */
 .profile-name-wrapper {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 3;
-  position: relative;
-  max-width: 100%;
 }
 
 .profile-container.dark .profile-name-wrapper {
@@ -160,7 +159,6 @@ body {
   align-items: center;
   gap: 0.5rem;
   color: inherit;
-  z-index: 3;
 }
 
 .wave-emoji {
@@ -182,16 +180,7 @@ body {
   100% { transform: rotate(0deg); }
 }
 
-.wave-emoji {
-  display: inline-block;
-  transform-origin: 70% 70%;
-}
-
-.wave-emoji:hover {
-  animation: wave 1.5s ease-in-out;
-}
-
-
+/* ---------- Body Content ---------- */
 .profile-body {
   margin-top: 80px;
   width: 100%;
@@ -213,7 +202,6 @@ body {
   padding: 1rem;
   border: 1px solid var(--border-light);
   border-radius: var(--radius);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .bio-textarea:focus {
@@ -226,6 +214,7 @@ body {
   border: 1px solid var(--border-dark);
 }
 
+/* ---------- Skills Section ---------- */
 .skills-section {
   margin-bottom: 3rem;
 }
@@ -248,13 +237,12 @@ body {
   border-radius: var(--radius);
   padding: 1rem;
   text-align: center;
-  transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+  transition: transform var(--transition), background var(--transition);
 }
 
 .skill-card:hover {
   transform: translateY(-5px) scale(1.03);
   background: #f0f0f0;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .profile-container.dark .skill-card {
@@ -270,6 +258,7 @@ body {
   filter: grayscale(100%);
 }
 
+/* ---------- Add Skill ---------- */
 .add-skill-btn {
   border: 2px dashed var(--accent);
   padding: 1rem;
@@ -281,6 +270,34 @@ body {
   color: inherit;
 }
 
+.add-skill-form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.add-skill-form input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+.add-skill-form button {
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.add-skill-form button:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- Timeline Tabs ---------- */
 .timeline-tabs {
   display: flex;
   gap: 1rem;
@@ -295,7 +312,6 @@ body {
   cursor: pointer;
   color: #333;
   font-weight: 500;
-  transition: background var(--transition);
 }
 
 .timeline-tab.active {
@@ -308,10 +324,7 @@ body {
   color: #eee;
 }
 
-.table-section {
-  overflow-x: auto;
-}
-
+/* ---------- Timeline Table ---------- */
 .timeline-table {
   width: 100%;
   border-collapse: collapse;
@@ -326,11 +339,15 @@ body {
   text-align: left;
 }
 
-.profile-container.dark .timeline-table th,
-.profile-container.dark .timeline-table td {
-  border: 1px solid var(--border-dark);
+.timeline-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
+.profile-container.dark .timeline-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- Editor Actions ---------- */
 .editor-actions {
   display: flex;
   justify-content: flex-end;
@@ -346,7 +363,6 @@ body {
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background var(--transition);
 }
 
 .save-button {
@@ -364,6 +380,7 @@ body {
   color: #fff;
 }
 
+/* ---------- Inputs ---------- */
 input[type="text"],
 input[type="file"],
 textarea {
@@ -372,10 +389,8 @@ textarea {
   border: 1px solid var(--border-light);
   border-radius: 6px;
   font-size: 1rem;
-  margin-bottom: 1rem;
   background: transparent;
   color: inherit;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 input:focus,
@@ -385,14 +400,7 @@ textarea:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
-.profile-container.dark input[type="text"],
-.profile-container.dark input[type="file"],
-.profile-container.dark textarea {
-  background-color: #1a1a1a;
-  border: 1px solid var(--border-dark);
-  color: var(--text-light);
-}
-
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
   .profile-top {
     flex-direction: column;
@@ -410,23 +418,73 @@ textarea:focus {
     font-size: 1.6rem;
   }
 
-  .toggle-buttons {
-    justify-content: center;
-  }
-
   .skills-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  }
-
-  .editor-actions {
-    justify-content: center;
   }
 
   .save-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 100;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
   }
+
+  .cancel-button {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+.social-icon-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.social-input {
+  margin-top: 4px;
+  font-size: 12px;
+  padding: 4px;
+  width: 150px;
+}
+
+.social-icon.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.social-icon.clickable:hover {
+  transform: scale(1.1);
+}
+
+.social-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.social-input {
+  flex: 1;
+}
+
+.social-links-below {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 50px;
+}
+
+.social-icon-resized {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+}
+
+.social-icon-resized:hover {
+  transform: scale(1.1);
 }

@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import './Profile.css';
+import githubLogo from '../Assets/profile/github-logo.png';
+import linkedinLogo from '../Assets/profile/linkedin-logo.png';
+import avatarlogo from '../Assets/profile/Avatar/default-profile.png';
+import bglogo from '../Assets/profile/Avatar/default-bg.png';
+
+
 
 const Profile = () => {
   const [tab, setTab] = useState('work');
@@ -9,12 +15,18 @@ const Profile = () => {
   const [bio, setBio] = useState('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales malesuada rutrum. In hac habitasse platea dictumst. Praet nulla ante, eleifend eget pellentesque congue, congue a urna.');
   const [name, setName] = useState('Hey, I’m Wilma');
   const [tempName, setTempName] = useState(name);
+  const [githubUrl, setGithubUrl] = useState('https://github.com/');
+  const [linkedinUrl, setLinkedinUrl] = useState('https://www.linkedin.com/');
+
+  const [tempGithubUrl, setTempGithubUrl] = useState(githubUrl);
+  const [tempLinkedinUrl, setTempLinkedinUrl] = useState(linkedinUrl);
+
   const [skills, setSkills] = useState([
     { name: 'Python', icon: '/assets/python-icon.png' },
     { name: 'HTML5', icon: '/assets/html5-icon.png' }
   ]);
-  const [profileImage, setProfileImage] = useState('/assets/profile/Avatar/default-profile.png');
-  const [coverImage, setCoverImage] = useState('/assets/profile/Avatar/default-bg.png');
+  const [profileImage, setProfileImage] = useState(avatarlogo);
+  const [coverImage, setCoverImage] = useState(bglogo);
   const [tempBio, setTempBio] = useState(bio);
   const [tempSkills, setTempSkills] = useState(skills);
   const [tempWork, setTempWork] = useState([]);
@@ -30,6 +42,9 @@ const Profile = () => {
     { school: 'High School X', degree: 'High School Diploma', year: '2012 - 2016' },
   ]);
 
+ 
+
+
   const handleImageUpload = (e, setImage) => {
     const file = e.target.files[0];
     if (file) {
@@ -41,33 +56,41 @@ const Profile = () => {
   const toggleTheme = () => setDarkMode(prev => !prev);
 
   const toggleEdit = () => {
-    if (!editorMode) {
-      setTempBio(bio);
-      setTempSkills(skills);
-      setTempWork([...workData]);
-      setTempEducation([...educationData]);
-      setTempName(name);
-    }
-    setEditorMode(prev => !prev);
-  };
-
-  const saveChanges = () => {
-    setBio(tempBio);
-    setSkills(tempSkills);
-    setWorkData(tempWork);
-    setEducationData(tempEducation);
-    setName(tempName);
-    setEditorMode(false);
-  };
-
-  const cancelChanges = () => {
+  if (!editorMode) {
     setTempBio(bio);
     setTempSkills(skills);
     setTempWork([...workData]);
     setTempEducation([...educationData]);
     setTempName(name);
-    setEditorMode(false);
-  };
+    setTempGithubUrl(githubUrl);
+    setTempLinkedinUrl(linkedinUrl);
+  }
+  setEditorMode(prev => !prev);
+};
+
+  const saveChanges = () => {
+  setBio(tempBio);
+  setSkills(tempSkills);
+  setWorkData(tempWork);
+  setEducationData(tempEducation);
+  setName(tempName);
+  setGithubUrl(tempGithubUrl);
+  setLinkedinUrl(tempLinkedinUrl);
+  setEditorMode(false);
+};
+
+
+  const cancelChanges = () => {
+  setTempBio(bio);
+  setTempSkills(skills);
+  setTempWork([...workData]);
+  setTempEducation([...educationData]);
+  setTempName(name);
+  setTempGithubUrl(githubUrl);
+  setTempLinkedinUrl(linkedinUrl);
+  setEditorMode(false);
+};
+
 
   const handleSkillChange = (index, newName) => {
     const updatedSkills = [...tempSkills];
@@ -109,15 +132,9 @@ const Profile = () => {
   };
 
   const deleteTimelineEntry = (type, index) => {
-    if (type === 'work') {
-      const updated = [...tempWork];
-      updated.splice(index, 1);
-      setTempWork(updated);
-    } else {
-      const updated = [...tempEducation];
-      updated.splice(index, 1);
-      setTempEducation(updated);
-    }
+    const updated = type === 'work' ? [...tempWork] : [...tempEducation];
+    updated.splice(index, 1);
+    type === 'work' ? setTempWork(updated) : setTempEducation(updated);
   };
 
   return (
@@ -138,10 +155,21 @@ const Profile = () => {
         )}
 
         <div className="profile-top">
-          <img className="profile-pic" src={profileImage} alt="profile" />
+          <div className="profile-pic-container">
+            <img className="profile-pic" src={profileImage} alt="profile" />
+            <div className="social-links">
+              <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+                <img src={githubLogo} alt="GitHub" className="social-icon" style={{ width: '32px', height: '32px' }} />
+              </a>
+              <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">
+                <img src={linkedinLogo} alt="LinkedIn" className="social-icon" style={{ width: '32px', height: '32px' }} />
+              </a>
+            </div>
+          </div>
           {editorMode && (
             <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProfileImage)} />
           )}
+
           <div className="profile-name">
             {editorMode ? (
               <>
@@ -159,6 +187,32 @@ const Profile = () => {
               </>
             )}
           </div>
+
+          {editorMode && (
+            <div className="social-inputs">
+              <div className="social-edit">
+                <img src={githubLogo} alt="GitHub" className="social-icon" style={{ width: '32px', height: '32px' }} />
+                <input
+                  type="text"
+                  value={tempGithubUrl}
+                  onChange={(e) => setTempGithubUrl(e.target.value)}
+                  placeholder="https://github.com/"
+                  className="social-input"
+                />
+              </div>
+              <div className="social-edit">
+                <img src={linkedinLogo} alt="LinkedIn" className="social-icon" style={{ width: '32px', height: '32px' }} />
+                <input
+                  type="text"
+                  value={tempLinkedinUrl}
+                  onChange={(e) => setTempLinkedinUrl(e.target.value)}
+                  placeholder="https://www.linkedin.com/"
+                  className="social-input"
+                />
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -185,7 +239,7 @@ const Profile = () => {
                       type="text"
                       value={skill.name}
                       onChange={(e) => handleSkillChange(index, e.target.value)}
-                    /> 
+                    />
                     <input
                       type="file"
                       accept="image/*"
