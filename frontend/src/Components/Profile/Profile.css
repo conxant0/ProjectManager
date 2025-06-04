@@ -488,3 +488,13 @@ textarea:focus {
 .social-icon-resized:hover {
   transform: scale(1.1);
 }
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+
