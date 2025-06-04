@@ -5,12 +5,12 @@ import supabase from '../../helper/supabaseClient';
 import ProjectModal from './ProjectModal';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
-  const [editorMode, setEditorMode] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate()
+  const [darkMode, setDarkMode] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [projects, setProjects] = useState([])
+  const [userId, setUserId] = useState(null)
+
 
   useEffect(() => {
     const getUser = async () => {
@@ -82,15 +82,10 @@ const Dashboard = () => {
     } else {
       navigate('/');
     }
-  };
+  }
+  const goToProfile = () => navigate('/profile')
+  const goToAddProject = () => navigate('/add-project')
 
-  const goToProfile = () => {
-    navigate('/profile', { state: { darkMode, editorMode } });
-  };
-
-  const goToAddProject = () => {
-    if (editorMode) navigate('/add-project');
-  };
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
@@ -100,9 +95,6 @@ const Dashboard = () => {
         </div>
         <nav className="nav-links">
           <button className="nav-btn">PROJECTS</button>
-          <button className="nav-btn">OPTION 1</button>
-          <button className="nav-btn">OPTION 2</button>
-          <button className="nav-btn">OPTION 3</button>
         </nav>
         <button className="logout-btn" onClick={handleLogout}>
           LOGOUT
@@ -116,24 +108,13 @@ const Dashboard = () => {
             <button className="toggle-mode" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? '🌙' : '☀️'}
             </button>
-            <button className="editor-btn" onClick={() => setEditorMode(!editorMode)}>
-              ✏️ Editor Mode
+            <button className="editor-btn" onClick={goToAddProject}>
+               Add Project
             </button>
           </div>
         </header>
 
         <div className="projects-grid">
-          {editorMode && (
-            <div
-              className={`project-card add-project-card ${darkMode ? 'dark' : 'light'}`}
-              onClick={goToAddProject}
-            >
-              <div className="project-thumbnail" style={{ backgroundColor: 'darkred' }}></div>
-              <h3>Add Project</h3>
-              <p>Click to add a new project</p>
-            </div>
-          )}
-
           {projects.map((project, i) => (
             <div
               className={`project-card ${darkMode ? 'dark' : 'light'}`}
@@ -190,10 +171,13 @@ const Dashboard = () => {
           darkMode={darkMode}
           onClose={() => setSelectedProject(null)}
           onDelete={() => fetchProjects(userId)}
+          onProjectUpdate={() => fetchProjects(userId)}
         />
       </main>
     </div>
   );
 };
 
-export default Dashboard;
+
+export default Dashboard
+
