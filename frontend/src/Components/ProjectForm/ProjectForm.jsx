@@ -293,7 +293,7 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
 
         <div className="row">
           <div>
-            <label>Category</label>
+            <label>Category *</label>
             <select 
               name="category" 
               value={formData.category} 
@@ -306,7 +306,7 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
             </select>
           </div>
           <div>
-            <label>Status</label>
+            <label>Status *</label>
             <select 
               name="status" 
               value={formData.status} 
@@ -330,7 +330,7 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
           disabled={isLoading}
         />
 
-        <label>Visibility</label>
+        <label>Visibility *</label>
         <div className="visibility-options">
           {['Public', 'Private', 'Archived'].map((v) => (
             <button
@@ -345,7 +345,7 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
           ))}
         </div>
 
-        <label>Description</label>
+        <label>Description *</label>
         <textarea 
           name="description" 
           value={formData.description} 
