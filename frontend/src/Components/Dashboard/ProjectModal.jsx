@@ -12,6 +12,8 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
   const [form, setForm] = useState({});
   const [newCoverFile, setNewCoverFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [newGalleryFiles, setNewGalleryFiles] = useState([]); // files to add
+  const [imagesToRemove, setImagesToRemove] = useState([]);   // URLs to remove
 
   // Initialize form with project data when component mounts or project changes
   useEffect(() => {
@@ -33,7 +35,8 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         githubURL: project.githubURL || '',
         figmaURL: project.figmaURL || '',
         notionURL: project.notionURL || '',
-        coverImage: project.coverImage || ''
+        coverImage: project.coverImage || '',
+        images: project.images || []
       };
       
       setForm(initialForm);
@@ -64,9 +67,9 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
       if (error) {
         console.error('Failed to delete project:', error.message);
       } else {
-        onClose(); // Close the modal
+        onClose(); 
         if (typeof onDelete === 'function') {
-          onDelete(); // Trigger dashboard refresh
+          onDelete(); 
         }
       }
     } catch (err) {
@@ -91,17 +94,14 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
 
   const handleSave = async () => {
     setLoading(true);
-    
     try {
       const projectId = project.projectID || project.id;
-      
       if (!projectId) {
         console.error('No valid project ID found');
         alert('Error: Could not find project ID');
         return;
       }
-
-      // Clean and validate the data before sending
+      // Update project fields
       const updates = {
         title: form.title?.trim() || '',
         description: form.description?.trim() || '',
@@ -116,29 +116,23 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         figmaURL: form.figmaURL?.trim() || '',
         notionURL: form.notionURL?.trim() || ''
       };
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('Project')
         .update(updates)
-        .eq('projectID', projectId)
-        .select();
-
+        .eq('projectID', projectId);
       if (error) {
         console.error('Supabase update error:', error);
         alert(`Failed to update project: ${error.message}`);
         return;
       }
-
       // Upload cover image if a new file is selected
       if (newCoverFile) {
         try {
           const fileExt = newCoverFile.name.split('.').pop();
           const filePath = `project-files/${projectId}_${Date.now()}.${fileExt}`;
-
           const { error: uploadError } = await supabase.storage
             .from('project-files')
             .upload(filePath, newCoverFile, { upsert: true });
-
           if (uploadError) {
             console.error('Failed to upload cover image:', uploadError);
             alert(`Failed to upload cover image: ${uploadError.message}`);
@@ -149,7 +143,6 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               .update({ filePATH: filePath })
               .eq('projectID', projectId)
               .eq('isCover', true);
-              
             if (mediaError) {
               console.error('Failed to update media record:', mediaError);
             }
@@ -158,9 +151,44 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           console.error('Error handling cover image:', imageError);
         }
       }
-
-      if (onProjectUpdate) onProjectUpdate(); // refresh dashboard
-      setIsEditing(false); // exit edit mode
+      // Remove gallery images
+      for (const url of imagesToRemove) {
+        // Find the file name from the URL
+        const match = url.match(/project-files\/([^?]+)/);
+        const fileName = match ? match[1] : null;
+        if (fileName) {
+          // Remove from storage
+          await supabase.storage.from('project-files').remove([fileName]);
+          // Remove from Media table
+          await supabase.from('Media')
+            .delete()
+            .eq('projectID', projectId)
+            .eq('filePATH', `${fileName}`)
+            .eq('isCover', false);
+        }
+      }
+      // Upload new gallery images
+      for (const file of newGalleryFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${projectId}_${Date.now()}_${Math.floor(Math.random()*10000)}.${fileExt}`;
+        const uploadPath = fileName;
+        const { error: uploadError } = await supabase.storage
+          .from('project-files')
+          .upload(uploadPath, file);
+        if (!uploadError) {
+          await supabase.from('Media').insert({
+            fileName: file.name,
+            fileType: file.type,
+            projectID: projectId,
+            filePATH: `${uploadPath}`,
+            isCover: false
+          });
+        }
+      }
+      if (onProjectUpdate) onProjectUpdate();
+      setIsEditing(false);
+      setNewGalleryFiles([]);
+      setImagesToRemove([]);
     } catch (error) {
       console.error('Unexpected error saving project:', error);
       alert(`Unexpected error: ${error.message}`);
@@ -188,7 +216,8 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
       githubURL: project.githubURL || '',
       figmaURL: project.figmaURL || '',
       notionURL: project.notionURL || '',
-      coverImage: project.coverImage || ''
+      coverImage: project.coverImage || '',
+      images: project.images || []
     });
     setNewCoverFile(null);
     setIsEditing(false);
@@ -200,6 +229,8 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
     ? form.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
     : [];
 
+  console.log("Gallery images for this project:", form.images);
+
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className={`modal ${darkMode ? 'dark' : 'light'}`} onClick={e => e.stopPropagation()}>
@@ -209,32 +240,25 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
             src={form.coverImage}
             alt={form.title}
             className="project-cover-image"
+            onError={e => { e.target.style.display = 'none'; }}
           />
         )}
 
         {/* Cover Image Upload (Edit Mode) */}
         {isEditing && (
-          <div style={{ margin: '12px 0' }}>
+          <div className="cover-image-upload-section">
             <label><strong>Cover Image:</strong></label>
             <input 
               type="file" 
               accept="image/*" 
               onChange={handleCoverChange}
-              style={{ 
-                width: '100%', 
-                padding: '4px', 
-                marginTop: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`cover-image-upload-input${darkMode ? ' dark' : ''}`}
             />
           </div>
         )}
 
         {/* Header Buttons */}
-        <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
+        <div className="modal-header-buttons">
           <button 
             className="edit-btn"
             onClick={() => setIsEditing(!isEditing)}
@@ -248,22 +272,14 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
 
         {/* Title */}
         {isEditing ? (
-          <div style={{ margin: '12px 0' }}>
+          <div className="modal-title-edit-section">
             <label><strong>Title:</strong></label>
             <input 
               name="title" 
               value={form.title} 
               onChange={handleChange}
               placeholder="Project title"
-              style={{
-                width: '100%',
-                padding: '8px',
-                marginTop: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`modal-title-input${darkMode ? ' dark' : ''}`}
             />
           </div>
         ) : (
@@ -272,7 +288,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
 
         {/* Description */}
         {isEditing ? (
-          <div style={{ margin: '12px 0' }}>
+          <div className="modal-description-edit-section">
             <label><strong>Description:</strong></label>
             <textarea 
               name="description" 
@@ -280,16 +296,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               onChange={handleChange}
               placeholder="Project description"
               rows="3"
-              style={{
-                width: '100%',
-                padding: '8px',
-                marginTop: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                resize: 'vertical'
-              }}
+              className={`modal-description-input${darkMode ? ' dark' : ''}`}
             />
           </div>
         ) : (
@@ -303,14 +310,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               name="category" 
               value={form.category} 
               onChange={handleChange}
-              style={{
-                marginLeft: '8px',
-                padding: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`modal-select${darkMode ? ' dark' : ''}`}
             >
               {CATEGORIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
@@ -324,14 +324,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               name="status" 
               value={form.status} 
               onChange={handleChange}
-              style={{
-                marginLeft: '8px',
-                padding: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`modal-select${darkMode ? ' dark' : ''}`}
             >
               {STATUSES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
@@ -346,15 +339,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               value={form.tags}
               onChange={handleChange}
               placeholder="comma-separated tags"
-              style={{
-                marginLeft: '8px',
-                padding: '4px',
-                width: '60%',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`modal-input-short${darkMode ? ' dark' : ''}`}
             />
           ) : (tags.length > 0 ? tags.join(', ') : '-')}
         </p>
@@ -366,14 +351,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
               name="visibility" 
               value={form.visibility} 
               onChange={handleChange}
-              style={{
-                marginLeft: '8px',
-                padding: '4px',
-                backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className={`modal-select${darkMode ? ' dark' : ''}`}
             >
               {VISIBILITIES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
@@ -381,91 +359,59 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         </p>
 
         {/* Project Highlights */}
-        <div style={{ margin: '12px 0' }}>
+        <div className="project-highlights-section">
           <h3>Project Highlights</h3>
           
           <p>
             <strong>Tools Used:</strong> {isEditing ? (
-              <input 
-                name="tools" 
-                value={form.tools} 
-                onChange={handleChange}
-                placeholder="Tools and technologies used"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="tools" 
+              value={form.tools} 
+              onChange={handleChange}
+              placeholder="Tools and technologies used"
+              className={`project-highlights-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.tools || '-')}
           </p>
           
           <p>
             <strong>Your Role:</strong> {isEditing ? (
-              <input 
-                name="role" 
-                value={form.role} 
-                onChange={handleChange}
-                placeholder="Your role in this project"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="role" 
+              value={form.role} 
+              onChange={handleChange}
+              placeholder="Your role in this project"
+              className={`project-highlights-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.role || '-')}
           </p>
           
           <p>
             <strong>Timeline:</strong> {isEditing ? (
-              <input 
-                name="timeline" 
-                value={form.timeline} 
-                onChange={handleChange}
-                placeholder="Project timeline"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="timeline" 
+              value={form.timeline} 
+              onChange={handleChange}
+              placeholder="Project timeline"
+              className={`project-highlights-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.timeline || '-')}
           </p>
         </div>
 
         {/* Project Links */}
-        <div style={{ margin: '12px 0' }}>
+        <div className="project-links-section">
           <h3>Project Links</h3>
           
           <p>
             <strong>GitHub:</strong> {isEditing ? (
-              <input 
-                name="githubURL" 
-                value={form.githubURL} 
-                onChange={handleChange}
-                placeholder="GitHub URL"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="githubURL" 
+              value={form.githubURL} 
+              onChange={handleChange}
+              placeholder="GitHub URL"
+              className={`project-links-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.githubURL ? (
               <a href={form.githubURL} target="_blank" rel="noopener noreferrer">{form.githubURL}</a>
             ) : ' -')}
@@ -473,21 +419,13 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           
           <p>
             <strong>Figma:</strong> {isEditing ? (
-              <input 
-                name="figmaURL" 
-                value={form.figmaURL} 
-                onChange={handleChange}
-                placeholder="Figma URL"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="figmaURL" 
+              value={form.figmaURL} 
+              onChange={handleChange}
+              placeholder="Figma URL"
+              className={`project-links-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.figmaURL ? (
               <a href={form.figmaURL} target="_blank" rel="noopener noreferrer">{form.figmaURL}</a>
             ) : ' -')}
@@ -495,31 +433,110 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           
           <p>
             <strong>Notion:</strong> {isEditing ? (
-              <input 
-                name="notionURL" 
-                value={form.notionURL} 
-                onChange={handleChange}
-                placeholder="Notion URL"
-                style={{
-                  marginLeft: '8px',
-                  padding: '4px',
-                  width: '60%',
-                  backgroundColor: darkMode ? '#2a2a2a' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              />
+            <input 
+              name="notionURL" 
+              value={form.notionURL} 
+              onChange={handleChange}
+              placeholder="Notion URL"
+              className={`project-links-input${darkMode ? ' dark' : ''}`}
+            />
             ) : (form.notionURL ? (
               <a href={form.notionURL} target="_blank" rel="noopener noreferrer">{form.notionURL}</a>
             ) : ' -')}
           </p>
         </div>
 
+        {/* Project Images Showcase */}
+        <div className="project-gallery-section">
+          <h3 className="project-gallery-title">Project Gallery</h3>
+          <div className="project-gallery-images">
+            {isEditing ? (
+              <>
+                {/* Existing images with remove button, always render if non-empty string, like cover image */}
+                {Array.isArray(form.images) && form.images
+                  .map((img, idx) => (
+                    img && !imagesToRemove.includes(img) ? (
+                      <div key={idx} className="gallery-image-wrapper">
+                        <img
+                          src={img}
+                          alt={`Project image ${idx + 1}`}
+                          className="project-gallery-image"
+                          onError={e => { e.target.style.display = 'none'; }}
+                        />
+                        <button
+                          type="button"
+                          className="gallery-remove-btn"
+                          title="Remove image"
+                          onClick={() => setImagesToRemove(prev => [...prev, img])}
+                        >×</button>
+                      </div>
+                    ) : null
+                  ))}
+                {/* New images preview */}
+                {newGalleryFiles.map((file, idx) => (
+                  <div key={`new-${idx}`} className="gallery-image-wrapper">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="project-gallery-image"
+                    />
+                    <button
+                      type="button"
+                      className="gallery-remove-btn"
+                      title="Remove new image"
+                      onClick={() => setNewGalleryFiles(prev => prev.filter((_, i) => i !== idx))}
+                    >×</button>
+                  </div>
+                ))}
+                {/* Add images input */}
+                <label
+                  htmlFor="gallery-upload"
+                  className="gallery-add-label"
+                >
+                  + Add
+                  <input
+                    id="gallery-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const files = Array.from(e.target.files || []);
+                      setNewGalleryFiles(prev => [...prev, ...files]);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+                {/* Show message if no images */}
+                {(!form.images || form.images.filter(img => img && !imagesToRemove.includes(img)).length === 0) &&
+                  newGalleryFiles.length === 0 && (
+                  <div style={{ color: '#888', marginTop: 12 }}>No gallery images yet.</div>
+                )}
+              </>
+            ) : (
+              Array.isArray(form.images) && form.images.some(img => img && typeof img === 'string' && img.length > 0) ? (
+                form.images.map((img, idx) => (
+                  img && typeof img === 'string' && img.length > 0 ? (
+                    <img
+                      key={idx}
+                      src={img}
+                      alt={`Project image ${idx + 1}`}
+                      className="project-gallery-image"
+                      onError={e => { e.target.style.display = 'none'; }}
+                    />
+                  ) : null
+                ))
+              ) : (
+                <div style={{ color: '#888', marginTop: 12 }}>No gallery images yet.</div>
+              )
+            )}
+          </div>
+        </div>
+
         {/* Action Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+        <div className="modal-action-buttons">
           {isEditing ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="modal-action-edit-buttons">
               <button 
                 className="save-btn"
                 onClick={handleSave} 
