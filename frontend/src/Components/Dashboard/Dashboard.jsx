@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './Dashboard.css'
-import supabase from '../../helper/supabaseClient'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
+import supabase from '../../helper/supabaseClient';
 import ProjectModal from './ProjectModal';
-
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -12,28 +11,25 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([])
   const [userId, setUserId] = useState(null)
 
+
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (data?.user) setUserId(data.user.id)
-    }
-    getUser()
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) setUserId(data.user.id);
+    };
+    getUser();
 
     const checkFileList = async () => {
-    const { data, error } = await supabase
-      .storage
-      .from('project-files')
-      .list('', {
+      const { data, error } = await supabase.storage.from('project-files').list('', {
         search: '46_1748854834988',
       });
 
-    console.log('Supabase file list result:', data);
-    if (error) console.error('Error listing files:', error);
-  };
+      console.log('Supabase file list result:', data);
+      if (error) console.error('Error listing files:', error);
+    };
 
-  checkFileList();
-  
-  }, [])
+    checkFileList();
+  }, []);
 
   const fetchProjects = async (uid) => {
     if (!uid) return;
@@ -57,17 +53,15 @@ const Dashboard = () => {
 
     const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 
-    const projectsWithCover = data.map(project => {
+    const projectsWithCover = data.map((project) => {
       const coverMedia = Array.isArray(project.Media)
-        ? project.Media.find(m => m.isCover)
+        ? project.Media.find((m) => m.isCover)
         : null;
 
       const coverImage = coverMedia?.filePATH
         ? `${SUPABASE_URL}/storage/v1/object/public/${coverMedia.filePATH}`
         : null;
 
-      console.log('Generated coverImage URL:', coverImage);
-      console.log('coverMedia.filePATH:', coverMedia?.filePATH);
       return {
         ...project,
         coverImage,
@@ -77,21 +71,21 @@ const Dashboard = () => {
     setProjects(projectsWithCover);
   };
 
-
   useEffect(() => {
-    if (userId) fetchProjects(userId)
-  }, [userId])
+    if (userId) fetchProjects(userId);
+  }, [userId]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error('Logout failed:', error.message)
+      console.error('Logout failed:', error.message);
     } else {
-      navigate('/') 
+      navigate('/');
     }
   }
   const goToProfile = () => navigate('/profile')
   const goToAddProject = () => navigate('/add-project')
+
 
   return (
     <div className={`dashboard-fullscreen ${darkMode ? 'dark' : 'light'}`}>
@@ -102,7 +96,9 @@ const Dashboard = () => {
         <nav className="nav-links">
           <button className="nav-btn">PROJECTS</button>
         </nav>
-        <button className="logout-btn" onClick={handleLogout}>LOGOUT</button>
+        <button className="logout-btn" onClick={handleLogout}>
+          LOGOUT
+        </button>
       </aside>
 
       <main className={`main-content ${darkMode ? 'dark' : 'light'}`}>
@@ -131,7 +127,13 @@ const Dashboard = () => {
                   onError={() => console.warn('Image failed to load:', project.coverImage)}
                   alt={project.title}
                   className="project-thumbnail"
-                  style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
+                  style={{
+                    width: '100%',
+                    height: 120,
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    marginBottom: 8,
+                  }}
                 />
               ) : (
                 <div
@@ -140,7 +142,7 @@ const Dashboard = () => {
                     backgroundColor: project.thumbnailColor || '#ccc',
                     height: 120,
                     borderRadius: 8,
-                    marginBottom: 8
+                    marginBottom: 8,
                   }}
                 />
               )}
@@ -151,9 +153,11 @@ const Dashboard = () => {
                 {(Array.isArray(project.tags)
                   ? project.tags
                   : typeof project.tags === 'string'
-                    ? project.tags.split(',').map(tag => tag.trim())
+                    ? project.tags.split(',').map((tag) => tag.trim())
                     : []
-                ).map((tag, j) => <span key={j}>{tag}</span>)}
+                ).map((tag, j) => (
+                  <span key={j}>{tag}</span>
+                ))}
               </div>
               <div className="badges">
                 <span className="badge">🌐 {project.type}</span>
@@ -169,10 +173,11 @@ const Dashboard = () => {
           onDelete={() => fetchProjects(userId)}
           onProjectUpdate={() => fetchProjects(userId)}
         />
-
       </main>
     </div>
-  )
-}
+  );
+};
+
 
 export default Dashboard
+
