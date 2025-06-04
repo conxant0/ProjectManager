@@ -183,7 +183,7 @@ const Dashboard = () => {
           project={selectedProject}
           darkMode={darkMode}
           onClose={() => setSelectedProject(null)}
-          onProjectUpdate={() => fetchProjects(userId)}
+          onDelete={() => fetchProjects(userId)}
         />
 
       </main>
