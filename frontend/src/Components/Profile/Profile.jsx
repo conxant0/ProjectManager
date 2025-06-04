@@ -1,19 +1,96 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Profile.css';
+import supabase from '../../helper/supabaseClient'
 import githubLogo from '../Assets/profile/github-logo.png';
 import linkedinLogo from '../Assets/profile/linkedin-logo.png';
 import avatarlogo from '../Assets/profile/Avatar/default-profile.png';
 import bglogo from '../Assets/profile/Avatar/default-bg.png';
 
-
-
 const Profile = () => {
+  const [userID, setUserID] = useState(null);
   const [tab, setTab] = useState('work');
   const [darkMode, setDarkMode] = useState(false);
   const [editorMode, setEditorMode] = useState(false);
 
-  const [bio, setBio] = useState('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales malesuada rutrum. In hac habitasse platea dictumst. Praet nulla ante, eleifend eget pellentesque congue, congue a urna.');
-  const [name, setName] = useState('Hey, I’m Wilma');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserID(user.id);
+
+        const { data: profileData, error: profileError } = await supabase 
+        .from('Profile')
+        .select('*')
+        .eq('userID', user.id)
+        .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error("Error fetching profile:", profileError);
+        } else if (profileData) {
+          setName(profileData.name || 'User');
+          setBio(profileData.bio || 'Your Bio');
+          setGithubUrl(profileData.githubURL || 'https://github.com/');
+          setLinkedinUrl(profileData.linkedinURL || 'https://www.linkedin.com/');
+        }
+
+        const { data: workEntries, error: workError } =await supabase 
+        .from('Work')
+        .select('*')
+        .eq('userID', user.id);
+
+        if (workError) {
+          console.error("Error fetching work data:", workError);
+        } else {
+          setWorkData(workEntries);
+          setTempWork([...workEntries]);
+        }
+
+        const { data: educationEntries, error: educationError } = await supabase
+        .from('Education')
+        .select('*')
+        .eq('userID', user.id);
+
+        if (educationError){
+          console.error("Error fetching education data:", educationError);
+        }else {
+          const mappedEducation =educationEntries.map(entry => ({
+            ...entry,
+            attainment: entry.ed_attainment
+          }));
+          setEducationData(mappedEducation);
+          setTempEducation([...mappedEducation]);
+        }
+      } else {
+        console.error("User not logged in:", error);
+        navigate('/login');
+      }
+
+      const { data: skillsData, error: skillsError } = await supabase
+      .from('UserSkills')
+      .select('skill')
+      .eq('userID', user.id);
+
+      if(skillsError){
+        console.error('Error fetching skills:', skillsError);
+      }else {
+        const loadedSkills = skillsData.map(skill => ({
+          name:skill.skill,
+          icon: '/assets/default-skill.png'
+        }));
+      setSkills(loadedSkills);
+      setTempSkills(loadedSkills);
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
+  const [bio, setBio] = useState('Your Bio');
+  const [name, setName] = useState('User');
   const [tempName, setTempName] = useState(name);
   const [githubUrl, setGithubUrl] = useState('https://github.com/');
   const [linkedinUrl, setLinkedinUrl] = useState('https://www.linkedin.com/');
@@ -33,14 +110,10 @@ const Profile = () => {
   const [tempEducation, setTempEducation] = useState([]);
 
   const [workData, setWorkData] = useState([
-    { company: 'Google', role: 'Software Engineer', year: '2020 - Present' },
-    { company: 'Facebook', role: 'Intern', year: '2019 - 2020' },
+    { company: '-', role: '-', year: '-' },
   ]);
 
-  const [educationData, setEducationData] = useState([
-    { school: 'MIT', degree: 'BSc Computer Science', year: '2016 - 2020' },
-    { school: 'High School X', degree: 'High School Diploma', year: '2012 - 2016' },
-  ]);
+  const [educationData, setEducationData] = useState([]);
 
  
 
@@ -68,7 +141,8 @@ const Profile = () => {
   setEditorMode(prev => !prev);
 };
 
-  const saveChanges = () => {
+  const saveChanges = async () => {
+  console.log('tempEducation before save:', tempEducation);
   setBio(tempBio);
   setSkills(tempSkills);
   setWorkData(tempWork);
@@ -77,6 +151,137 @@ const Profile = () => {
   setGithubUrl(tempGithubUrl);
   setLinkedinUrl(tempLinkedinUrl);
   setEditorMode(false);
+
+  if (!userID) {
+    console.error('User ID not available.');
+    return;
+  }
+
+  const { data: existingProfile, error: fetchError } = await supabase
+    .from('Profile')
+    .select('*')
+    .eq('userID', userID)
+    .single();
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Fetch error:', fetchError);
+    return;
+  }
+
+  if (existingProfile) {
+    // Update if entry exists
+    const { error: updateError } = await supabase
+      .from('Profile')
+      .update({
+        bio: tempBio,
+        name: tempName,
+        githubURL: tempGithubUrl,
+        linkedinURL: tempLinkedinUrl
+      })
+      .eq('userID', userID);
+
+    if (updateError) {
+      console.error('Update error:', updateError);
+    }
+  } else {
+    // Insert new profile if it doesn't exist
+    const { error: insertError } = await supabase
+      .from('Profile')
+      .insert([{
+        userID: userID,
+        bio: tempBio,
+        name: tempName,
+        githubURL: tempGithubUrl,
+        linkedinURL: tempLinkedinUrl
+      }]);
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+    }
+  }
+
+  if (userID) {
+    try {
+      const { error: deleteSkillsError } = await supabase
+      .from('UserSkills')
+      .delete()
+      .eq('userID', userID);
+
+      if (deleteSkillsError) {
+        console.error('Error deleting old skills:', deleteSkillsError);
+      }
+
+      const skillsToInsert = Array.from(
+        new Map(
+          tempSkills
+            .filter(skill => skill.name.trim() !== '')
+            .map(skill => [skill.name.trim().toLowerCase(), {
+              userID: userID,
+              skill: skill.name.trim()
+            }])
+        ).values()
+      );
+    
+      if(skillsToInsert.length > 0) {
+        const {error: insertSkillsError } = await supabase
+        .from('UserSkills')
+        .insert(skillsToInsert);
+
+        if(insertSkillsError){
+          console.error('Error inserting new skills:', insertSkillsError);
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error syncing skills:', err);
+    }
+  }
+
+  await supabase.from('Work').delete().eq('userID', userID);
+
+  const workToInsert = tempWork.map(item => ({
+    userID,
+    company: item.company,
+    role: item.role,
+    year: item.year
+  }));
+
+  const { error: insertWorkError } = await supabase
+    .from('Work')
+    .insert(workToInsert);
+
+  if (insertWorkError) {
+    console.error('Error inserting work entries:', insertWorkError);
+  }
+
+  await supabase.from('Education').delete().eq('userID', userID);
+
+
+  const educationToInsert = tempEducation
+  .filter(item => item.institution && item.attainment && item.year)
+  .map(item => ({
+    userID,
+    institution: item.institution,
+    ed_attainment: item.attainment,
+    year: item.year
+  }));
+
+  if (educationToInsert.length > 0) {
+  const { error: insertEducationError } = await supabase
+    .from('Education')
+    .insert(educationToInsert);
+
+  if(insertEducationError){
+    console.error('Error inserting education entries:', insertEducationError);
+  }
+}
+
+  const { error: insertEducationError } = await supabase
+  .from('Education')
+  .insert(educationToInsert);
+
+  if(insertEducationError){
+    console.error('Error inserting education entries:', insertEducationError);
+  }
 };
 
 
@@ -117,15 +322,23 @@ const Profile = () => {
   };
 
   const handleTimelineChange = (index, field, value, type) => {
-    const data = type === 'work' ? [...tempWork] : [...tempEducation];
-    data[index][field] = value;
-    type === 'work' ? setTempWork(data) : setTempEducation(data);
+    if (type === 'work') {
+      const updated = tempWork.map((entry, i) => 
+      i === index ? {...entry, [field]: value}: entry 
+    );
+    setTempWork(updated);
+    } else {
+      const updated = tempEducation.map((entry, i) =>
+      i === index ? {...entry, [field]: value }: entry
+    );
+    setTempEducation(updated);
+    }
   };
 
   const addTimelineEntry = (type) => {
     const newEntry = type === 'work'
       ? { company: '', role: '', year: '' }
-      : { school: '', degree: '', year: '' };
+      : { institution: '', attainment: '', year: '' };
     type === 'work'
       ? setTempWork([...tempWork, newEntry])
       : setTempEducation([...tempEducation, newEntry]);
@@ -277,8 +490,8 @@ const Profile = () => {
           <table className="timeline-table">
             <thead>
               <tr>
-                <th>{tab === 'work' ? 'Company' : 'School'}</th>
-                <th>{tab === 'work' ? 'Role' : 'Degree'}</th>
+                <th>{tab === 'work' ? 'Company' : 'Institution'}</th>
+                <th>{tab === 'work' ? 'Role' : 'Attainment'}</th>
                 <th>Year</th>
                 {editorMode && <th>Actions</th>}
               </tr>
@@ -290,22 +503,22 @@ const Profile = () => {
                     {editorMode ? (
                       <input
                         type="text"
-                        value={tab === 'work' ? item.company : item.school}
-                        onChange={(e) => handleTimelineChange(idx, tab === 'work' ? 'company' : 'school', e.target.value, tab)}
+                        value={tab === 'work' ? item.company : item.institution}
+                        onChange={(e) => handleTimelineChange(idx, tab === 'work' ? 'company' : 'institution', e.target.value, tab)}
                       />
                     ) : (
-                      tab === 'work' ? item.company : item.school
+                      tab === 'work' ? item.company : item.institution
                     )}
                   </td>
                   <td>
                     {editorMode ? (
                       <input
                         type="text"
-                        value={tab === 'work' ? item.role : item.degree}
-                        onChange={(e) => handleTimelineChange(idx, tab === 'work' ? 'role' : 'degree', e.target.value, tab)}
+                        value={tab === 'work' ? item.role : item.attainment}
+                        onChange={(e) => handleTimelineChange(idx, tab === 'work' ? 'role' : 'attainment', e.target.value, tab)}
                       />
                     ) : (
-                      tab === 'work' ? item.role : item.degree
+                      tab === 'work' ? item.role : item.attainment
                     )}
                   </td>
                   <td>
@@ -329,16 +542,16 @@ const Profile = () => {
             </tbody>
           </table>
           {editorMode && (
-            <button onClick={() => addTimelineEntry(tab)} className="add-entry-button">
-              + Add {tab === 'work' ? 'Work' : 'Education'}
+            <button onClick={() => addTimelineEntry(tab)}>
+              + Add {tab === 'work' ? 'Work' : 'Education'} Entry
             </button>
           )}
         </div>
 
         {editorMode && (
-          <div className="editor-actions">
-            <button className="save-button" onClick={saveChanges}>Save</button>
-            <button className="cancel-button" onClick={cancelChanges}>Cancel</button>
+          <div className="button-wrapper">
+            <button onClick={saveChanges} className= "save-button">Save Changes</button>
+            <button onClick={cancelChanges} className="cancel-button">Cancel</button>
           </div>
         )}
       </div>
