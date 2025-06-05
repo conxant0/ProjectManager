@@ -61,50 +61,30 @@ body {
 .toggle-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  width: 100%;
-  max-width: 1200px;
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: inherit;
-  backdrop-filter: blur(10px);
+  gap: 10px;
+  padding: 10px;
 }
 
 .toggle-button {
+  font-size: 20px;
   background: none;
   border: none;
-  font-size: 1.4rem;
   cursor: pointer;
-  color: inherit;
 }
 
 .profile-header {
-  width: 100%;
-  max-width: 1200px;
-  height: 300px;
   position: relative;
-  overflow: visible;
-  border-radius: var(--radius);
-}
-
-.cover-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(100%);
 }
 
 /* ---------- Profile Top ---------- */
 .profile-top {
-  position: absolute;
-  bottom: -80px;
-  left: 5%;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  position: relative;
+  margin-top: -50px; /* Pull it up to overlap cover photo */
+  padding: 0 20px;
   z-index: 2;
 }
 
@@ -113,13 +93,11 @@ body {
 }
 
 .profile-pic {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  border: 4px solid #fff;
+  border: 4px solid white;
   object-fit: cover;
-  background: #eee;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .edit-icon-overlay {
@@ -153,17 +131,13 @@ body {
 }
 
 .profile-name {
-  font-size: 2rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: inherit;
+  margin-top: 10px;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .wave-emoji {
-  display: inline-block;
-  transform-origin: 70% 70%;
+  margin-left: 10px;
 }
 
 .profile-name:hover .wave-emoji {
@@ -464,12 +438,18 @@ textarea:focus {
 .social-edit {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
 }
 
 .social-input {
   flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
 }
 
 .social-links-below {
@@ -497,20 +477,119 @@ textarea:focus {
   margin-bottom: 20px;
 }
 
+.profile-pic-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.profile-upload {
+  position: absolute;
+  bottom: -25px;
+  left: 0;
+  right: 0;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.social-links {
+  position: absolute;
+  bottom: 10px;
+  left: 120px; /* Position to the right of profile pic */
+  display: flex;
+  gap: 10px;
+}
+
+.cover-photo-container{
+  position: relative;
+  width: 100%;
+}
+
+.cover-photo {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.cover-upload {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.social-icon {
+  transition: transform 0.2s;
+}
+
+.social-icon:hover {
+  transform: scale(1.1);
+}
+
+.name-input {
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  padding: 5px 10px;
+  background: transparent;
+}
+
+.social-inputs {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.profile-container.dark .social-edit {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-container.dark .social-input {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #444;
+  color: white;
+}
+
+.profile-container.dark .name-input {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #444;
+  color: white;
+}
+
 .home-button {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  color: var(--button-text, #fff);
+  top: 10px;
+  left: 10px;
+  background: none;
   border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 16px;
+  font-size: 14px;
+  color: #555;
   cursor: pointer;
-  z-index: 1000;
+  padding: 5px 10px;
+  transition: color 0.2s ease;
 }
 
 .home-button:hover {
-  background-color: var(--button-hover-bg, #333);
+  color: #000;
+  text-decoration: underline;
 }
 
+.profile-container.dark .home-button {
+  color: #ddd;
+}
+
+.profile-container.dark .home-button:hover {
+  color: #fff;
+}

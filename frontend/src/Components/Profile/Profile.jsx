@@ -59,7 +59,7 @@ const Profile = () => {
         if (educationError){
           console.error("Error fetching education data:", educationError);
         }else {
-          const mappedEducation =educationEntries.map(entry => ({
+          const mappedEducation =(educationEntries || []).map(entry => ({
             ...entry,
             attainment: entry.ed_attainment
           }));
@@ -120,13 +120,50 @@ const Profile = () => {
  
 
 
-  const handleImageUpload = (e, setImage) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
-    }
-  };
+  const handleImageUpload = async (e, type) => {
+  const file = e.target.files[0];
+  if (!file || !userID) return;
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userID}-${Date.now()}.${fileExt}`;
+  const bucket = type === 'profile' ? 'profile-photos' : 'cover-photos';
+
+  // Upload file to Supabase Storage
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: true
+    });
+
+  if (error) {
+    console.error(`Error uploading ${type} image:`, error);
+    return;
+  }
+
+  // Get the public URL
+  const { data: publicUrlData } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(fileName);
+
+  const imageUrl = publicUrlData.publicUrl;
+
+  // Update preview and (optionally) update the Profile table
+  if (type === 'profile') {
+    setProfileImage(imageUrl);
+    await supabase
+      .from('Profile')
+      .update({ profile_image_url: imageUrl })
+      .eq('userID', userID);
+  } else {
+    setCoverImage(imageUrl);
+    await supabase
+      .from('Profile')
+      .update({ cover_image_url: imageUrl })
+      .eq('userID', userID);
+  }
+};
+
 
   const toggleTheme = () => setDarkMode(prev => !prev);
 
@@ -276,16 +313,7 @@ const Profile = () => {
     console.error('Error inserting education entries:', insertEducationError);
   }
 }
-
-  const { error: insertEducationError } = await supabase
-  .from('Education')
-  .insert(educationToInsert);
-
-  if(insertEducationError){
-    console.error('Error inserting education entries:', insertEducationError);
-  }
-};
-
+  };
 
   const cancelChanges = () => {
   setTempBio(bio);
@@ -354,6 +382,9 @@ const Profile = () => {
 
   return (
     <div className={`profile-container ${darkMode ? 'dark' : 'light'} ${editorMode ? 'edit-mode' : ''}`}>
+      <button className ="home-button" onClick={goHome}>
+      ⬅ Dashboard
+      </button>
       <div className="toggle-buttons">
         <button className="toggle-button" onClick={toggleTheme}>
           {darkMode ? '🌞' : '🌙'}
@@ -362,19 +393,26 @@ const Profile = () => {
           {editorMode ? '🔓' : '✏️'}
         </button>
       </div>
-      <button onClick={goHome} className="home-button">
-        🏠
-      </button>
 
       <div className="profile-header">
-        <img className="cover-photo" src={coverImage} alt="cover" />
+        <div className="cover-photo-container">
+          <img className="cover-photo" src={coverImage} alt="cover" />
         {editorMode && (
-          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setCoverImage)} />
+          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setCoverImage)} className="cover-upload"/>
         )}
+        </div>
 
         <div className="profile-top">
           <div className="profile-pic-container">
             <img className="profile-pic" src={profileImage} alt="profile" />
+            {editorMode && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, setProfileImage)}
+                className="profile-upload"
+              />
+            )}
             <div className="social-links">
               <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                 <img src={githubLogo} alt="GitHub" className="social-icon" style={{ width: '32px', height: '32px' }} />
@@ -384,9 +422,6 @@ const Profile = () => {
               </a>
             </div>
           </div>
-          {editorMode && (
-            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProfileImage)} />
-          )}
 
           <div className="profile-name">
             {editorMode ? (
@@ -395,6 +430,8 @@ const Profile = () => {
                   type="text"
                   value={tempName}
                   onChange={(e) => setTempName(e.target.value)}
+                  placeholder="Enter Name"
+                  className="name-input"
                 />
                 <span className="wave-emoji">👋</span>
               </>
@@ -405,11 +442,12 @@ const Profile = () => {
               </>
             )}
           </div>
+        
 
           {editorMode && (
             <div className="social-inputs">
               <div className="social-edit">
-                <img src={githubLogo} alt="GitHub" className="social-icon" style={{ width: '32px', height: '32px' }} />
+                <img src={githubLogo} alt="GitHub" className="social-icon" style={{ width: '24px', height: '24px' }} />
                 <input
                   type="text"
                   value={tempGithubUrl}
@@ -419,7 +457,7 @@ const Profile = () => {
                 />
               </div>
               <div className="social-edit">
-                <img src={linkedinLogo} alt="LinkedIn" className="social-icon" style={{ width: '32px', height: '32px' }} />
+                <img src={linkedinLogo} alt="LinkedIn" className="social-icon" style={{ width: '24px', height: '24px' }} />
                 <input
                   type="text"
                   value={tempLinkedinUrl}
@@ -563,5 +601,4 @@ const Profile = () => {
     </div>
   );
 };
-
 export default Profile;
