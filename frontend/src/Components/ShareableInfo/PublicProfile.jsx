@@ -53,6 +53,22 @@ const PublicProfile = () => {
             ? profile.skills
             : 'Not specified'}
         </p>
+        <div className="social-links">
+          {profile.githubURL && (
+            <p>
+              <a href={profile.githubURL} target="_blank" rel="noopener noreferrer">
+                GitHub Profile
+              </a>
+            </p>
+          )}
+          {profile.linkedinURL && (
+            <p>
+              <a href={profile.linkedinURL} target="_blank" rel="noopener noreferrer">
+                LinkedIn Profile
+              </a>
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="public-projects">
