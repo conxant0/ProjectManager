@@ -12,8 +12,10 @@ const Profile = () => {
   const [tab, setTab] = useState('work');
   const [darkMode, setDarkMode] = useState(false);
   const [editorMode, setEditorMode] = useState(false);
-
   const navigate = useNavigate();
+  const goHome = () => {
+    navigate('/dashboard');
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -360,6 +362,9 @@ const Profile = () => {
           {editorMode ? '🔓' : '✏️'}
         </button>
       </div>
+      <button onClick={goHome} className="home-button">
+        🏠
+      </button>
 
       <div className="profile-header">
         <img className="cover-photo" src={coverImage} alt="cover" />
