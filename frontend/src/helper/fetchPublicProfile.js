@@ -19,7 +19,7 @@ export const fetchPublicProfile = async (username) => {
   // Step 2: Fetch the Profile row using the mixed-case "userID" column
   const { data: profileData, error: profileError } = await supabase
     .from('Profile')
-    .select('ProfileID, name, bio, skills, username')
+    .select('ProfileID, name, bio, skills, username, githubURL, linkedinURL')
     .eq('"userID"', userId)
     .maybeSingle()
 
