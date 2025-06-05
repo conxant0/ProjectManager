@@ -1,35 +1,488 @@
-/* Container to help with spacing above title */
-.status-container {
-  margin-bottom: 0.5rem;
+.project-form select:focus,
+.project-form .selected {
+  color: #fff;
+  background: #232323;
+  border-color: #fff;
+  transition: background 0.18s, color 0.18s, border 0.18s;
 }
 
-/* Reuse your existing .badge styling, but override for status if needed */
-.status-badge {
-  /* If .badge already has padding, background, border-radius, etc., you can skip or override only the color. 
-     Otherwise, uncomment all of these lines and tweak to taste. */
-
-  /* Example overrides: */
-   background-color: #e0e7ff;  /* light indigo-ish bg */ 
-   color: #3730a3;            /* dark indigo text */ 
-   padding: 2px 8px;          /* smaller pill padding */ 
-   border-radius: 12px;       /* pill shape */ 
-   font-size: 0.75rem;        /* a bit smaller than project title */ 
-   display: inline-block;     /* shrink to fit */ 
-
-  /* If your existing .badge is working fine (colors, padding, etc.), you can simply do: */
-  font-size: 0.85rem;
-  opacity: 0.9;
+/* Light mode hover/focus for select and .selected */
+.project-form select:hover,
+.project-form select:focus,
+.project-form .selected:hover {
+  background: #232323;
+  color: #fff;
+  border-color: #232323;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+.project-form-bg-blur,
+.project-form {
+  /* Custom scrollbar for overlay and form */
+  scrollbar-width: thin;
+  scrollbar-color: #bbb #222;
 }
 
-/* If you need to define .badge from scratch (in case you don’t already have it), here’s a quick example: */
 
-.badge {
+.project-form-bg-blur::-webkit-scrollbar,
+.project-form::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+.project-form-bg-blur::-webkit-scrollbar-thumb,
+.project-form::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.project-form-bg-blur.dark::-webkit-scrollbar-thumb,
+.project-form.dark::-webkit-scrollbar-thumb {
+  background: #444;
+}
+.project-form-bg-blur::-webkit-scrollbar-track,
+.project-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-form-bg-blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.856);
+  backdrop-filter: blur(8px) saturate(1.2);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  overflow-y: auto;
+}
+.project-form-bg-blur.light {
+  background: rgba(255,255,255,0.35);
+}
+.project-form-bg-blur.dark {
+  background: rgba(0,0,0,0.45);
+}
+.project-form {
+  position: relative;
+  z-index: 1001;
+  max-height: 95vh;
+  overflow-y: auto;
+}
+.project-form h2 {
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.5px;
+  color: #111;
+  text-align: center;
+}
+
+.project-form label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.1rem;
+  margin-bottom: 0.3rem;
+  display: block;
+  color: #232323;
+}
+
+.project-form input,
+.project-form select,
+.project-form textarea {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  font-size: 1rem;
+  font-family: 'Happy Monkey', cursive;
+  margin-bottom: 0.7rem;
+  background: #f8f8f8;
+  color: #181818;
+  transition: border 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+.project-form input:focus,
+.project-form select:focus,
+.project-form textarea:focus {
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.project-form select:focus,
+.project-form .selected {
+  color: #fff;
+  background: #232323;
+  border-color: #fff;
+}
+
+.project-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.project-form .row {
+  display: flex;
+  gap: 1.2rem;
+}
+.project-form .row > div {
+  flex: 1;
+}
+
+.project-form .visibility-options {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.project-form .visibility-options button {
+  background: #232323;
+  border: 1.5px solid #d1d5db;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-family: 'Happy Monkey', cursive;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+.project-form .visibility-options button.selected,
+.project-form .visibility-options button:focus {
+  background: #fff;
+  color: #232323;
+  border: 1.5px solid #232323;
+}
+
+.file-upload-label {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  background-color: #f3f4f6;  /* light gray background */
-  color: #374151;            /* dark gray text */
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-family: 'Happy Monkey', cursive;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  margin-top: 0.2rem;
+  transition: background 0.18s, color 0.18s;
 }
+.file-upload-label:hover {
+  background: black;
+  color: #fff;
+}
+
+.project-form ul.mt-2 {
+  margin: 0.5rem 0 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+.project-form ul.mt-2 li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1rem;
+  color: #232323;
+}
+.project-form ul.mt-2 button {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: 'Happy Monkey', cursive;
+}
+.project-form ul.mt-2 button:hover {
+  color: #b71c1c;
+}
+
+.project-form h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #111;
+}
+
+
+.project-form.dark,
+.dashboard-fullscreen.dark .project-form {
+  background: #181818;
+  color: #eee;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25), 0 1.5px 8px rgba(25,25,25,0.10);
+}
+
+.project-form.dark input,
+.project-form.dark select,
+.project-form.dark textarea,
+.dashboard-fullscreen.dark .project-form input,
+.dashboard-fullscreen.dark .project-form select,
+.dashboard-fullscreen.dark .project-form textarea {
+  background: #232323;
+  color: #eee;
+  border: 1.5px solid #333;
+}
+
+.project-form.dark input:focus,
+.project-form.dark select:focus,
+.project-form.dark textarea:focus,
+.dashboard-fullscreen.dark .project-form input:focus,
+.dashboard-fullscreen.dark .project-form select:focus,
+.dashboard-fullscreen.dark .project-form textarea:focus {
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.project-form.dark label,
+.project-form.dark h2,
+.project-form.dark h3,
+.dashboard-fullscreen.dark .project-form label,
+.dashboard-fullscreen.dark .project-form h2,
+.dashboard-fullscreen.dark .project-form h3 {
+  color: #fff;
+}
+
+.project-form.dark .file-upload-label,
+.dashboard-fullscreen.dark .file-upload-label {
+  background: #232323;
+  color: #fff;
+}
+
+.project-form.dark .file-upload-label:hover,
+.dashboard-fullscreen.dark .file-upload-label:hover {
+  background: #fff;
+  color: #232323;
+}
+
+.project-form.dark .form-buttons .save-btn,
+.dashboard-fullscreen.dark .form-buttons .save-btn {
+  background: #232323;
+  color: #fff;
+}
+
+.project-form.dark .form-buttons .save-btn:hover,
+.dashboard-fullscreen.dark .form-buttons .save-btn:hover {
+  background: #fff;
+  color: #232323;
+}
+
+.project-form.dark .form-buttons .cancel-btn,
+.dashboard-fullscreen.dark .form-buttons .cancel-btn {
+  background: #bbb;
+  color: #232323;
+}
+
+.project-form.dark .form-buttons .cancel-btn:hover,
+.dashboard-fullscreen.dark .form-buttons .cancel-btn:hover {
+  background: #232323;
+  color: #fff;
+}
+
+/* Animation for ProjectForm mount (used in ProjectForm.jsx) */
+.project-form-animate {
+  animation: fadeInScale 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.save-btn, .cancel-btn {
+  background: #232323;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.1rem;
+  font-family: 'Happy Monkey', cursive;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+
+
+/* Error message styling */
+.error-message {
+  color: #d32f2f !important;
+  background: #ffe6e6 !important;
+  border: 1.5px solid #d32f2f !important;
+  border-radius: 8px !important;
+  font-size: 1rem;
+  font-family: 'Happy Monkey', cursive;
+  margin-bottom: 1.2rem;
+  padding: 0.8rem 1.2rem;
+}
+
+/* Dark mode support */
+.dashboard-fullscreen.dark .project-form {
+  background: #181818;
+  color: #eee;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25), 0 1.5px 8px rgba(25,25,25,0.10);
+}
+.dashboard-fullscreen.dark .project-form input,
+.dashboard-fullscreen.dark .project-form select,
+.dashboard-fullscreen.dark .project-form textarea {
+  background: #232323;
+  color: #eee;
+  border: 1.5px solid #333;
+}
+.dashboard-fullscreen.dark .project-form input:focus,
+.dashboard-fullscreen.dark .project-form select:focus,
+.dashboard-fullscreen.dark .project-form textarea:focus {
+  border: 1.5px solid #90caf9;
+  box-shadow: 0 0 0 2px #90caf9;
+}
+.dashboard-fullscreen.dark .project-form label,
+.dashboard-fullscreen.dark .project-form h2,
+.dashboard-fullscreen.dark .project-form h3 {
+  color: #fff;
+}
+.dashboard-fullscreen.dark .file-upload-label {
+  background: #232323;
+  color: #fff;
+}
+.dashboard-fullscreen.dark .file-upload-label:hover {
+  background: #90caf9;
+  color: #232323;
+}
+.dashboard-fullscreen.dark .form-buttons .save-btn {
+  background: #90caf9;
+  color: #232323;
+}
+.dashboard-fullscreen.dark .form-buttons .save-btn:hover {
+  background: #232323;
+  color: #fff;
+}
+.dashboard-fullscreen.dark .form-buttons .cancel-btn {
+  background: #bbb;
+  color: #232323;
+}
+.dashboard-fullscreen.dark .form-buttons .cancel-btn:hover {
+  background: #232323;
+  color: #fff;
+}
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.project-form-animate {
+  animation: fadeInScale 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.project-form {
+  background: white;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  font-family: sans-serif;
+}
+
+.project-form h2 {
+  margin-bottom: 20px;
+}
+
+.project-form label {
+  font-weight: 600;
+  margin-top: 12px;
+  display: block;
+}
+
+.project-form input,
+.project-form select,
+.project-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.project-form textarea {
+  height: 80px;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+}
+
+.visibility-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.visibility-options button {
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 5px;
+  background: #f9f9f9;
+  cursor: pointer;
+}
+
+.visibility-options .selected {
+  background: #000;
+  color: white;
+}
+
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-btn,
+.save-btn {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.save-btn:hover {
+  background: #bbb;
+  color: #232323;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+}
+.cancel-btn:hover {
+  background: #bbb;
+  color: #232323;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.10);
+}
+
+.cancel-btn {
+  background: #232323;
+}
+
+
 
