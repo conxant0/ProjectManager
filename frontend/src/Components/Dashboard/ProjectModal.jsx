@@ -126,25 +126,50 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
         return;
       }
       // Upload cover image if a new file is selected
+      let newCoverPublicUrl = null;
       if (newCoverFile) {
         try {
           const fileExt = newCoverFile.name.split('.').pop();
           const filePath = `project-files/${projectId}_${Date.now()}.${fileExt}`;
+          // Upload new cover image
           const { error: uploadError } = await supabase.storage
             .from('project-files')
-            .upload(filePath, newCoverFile, { upsert: true });
+            .upload(filePath, newCoverFile);
           if (uploadError) {
             console.error('Failed to upload cover image:', uploadError);
             alert(`Failed to upload cover image: ${uploadError.message}`);
           } else {
-            // Update media record
-            const { error: mediaError } = await supabase
+            // Delete old cover Media row (if any)
+            const { error: deleteError } = await supabase
               .from('Media')
-              .update({ filePATH: filePath })
+              .delete()
               .eq('projectID', projectId)
               .eq('isCover', true);
-            if (mediaError) {
-              console.error('Failed to update media record:', mediaError);
+            if (deleteError) {
+              console.error('Failed to delete old cover image record:', deleteError);
+            }
+            // Insert new Media row for cover
+            const { error: insertError } = await supabase
+              .from('Media')
+              .insert({
+                projectID: projectId,
+                filePATH: filePath,
+                isCover: true,
+                fileName: newCoverFile.name,
+                fileType: newCoverFile.type,
+              });
+            if (insertError) {
+              console.error('Failed to insert new cover image record:', insertError);
+            }
+            // Always get the new public URL after upload
+            const { data: publicUrlData } = supabase.storage
+              .from('project-files')
+              .getPublicUrl(filePath);
+            if (publicUrlData && publicUrlData.publicUrl) {
+              newCoverPublicUrl = publicUrlData.publicUrl;
+              setForm(prev => ({ ...prev, coverImage: publicUrlData.publicUrl }));
+              // Immediately notify parent/dashboard of the update so the new cover image appears
+              if (onProjectUpdate) onProjectUpdate();
             }
           }
         } catch (imageError) {
@@ -185,10 +210,23 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
           });
         }
       }
+      // Always call onProjectUpdate after cover image update so dashboard refreshes
       if (onProjectUpdate) onProjectUpdate();
       setIsEditing(false);
       setNewGalleryFiles([]);
       setImagesToRemove([]);
+      // If a new cover image was uploaded, update the form state again to ensure UI refresh
+      if (newCoverPublicUrl) {
+        // Update the Project table's coverImage column
+        const { error: projectCoverUpdateError } = await supabase
+          .from('Project')
+          .update({ coverImage: newCoverPublicUrl })
+          .eq('projectID', projectId);
+
+        if (projectCoverUpdateError) {
+          console.error('Failed to update coverImage in Project table:', projectCoverUpdateError);
+        }
+      }
     } catch (error) {
       console.error('Unexpected error saving project:', error);
       alert(`Unexpected error: ${error.message}`);

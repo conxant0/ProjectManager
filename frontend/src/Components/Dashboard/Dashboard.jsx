@@ -62,7 +62,7 @@ const Dashboard = () => {
           ? project.Media.find(m => m.isCover)
           : null;
         const coverImage = coverMedia?.filePATH
-          ? `${SUPABASE_URL}/storage/v1/object/public/${coverMedia.filePATH}`
+          ? `${SUPABASE_URL}/storage/v1/object/public/project-files/${coverMedia.filePATH}`
           : null;
 
         // Gallery images

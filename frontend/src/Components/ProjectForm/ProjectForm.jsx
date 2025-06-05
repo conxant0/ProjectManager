@@ -89,10 +89,8 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
   const uploadFile = async (file, projectId, isCover = false) => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${projectId}_${Date.now()}.${fileExt}`;  // just filename
-
-      // Upload path relative to the bucket (NO bucket prefix here)
-      const uploadPath = fileName;  
+      const fileName = `${projectId}_${Date.now()}.${fileExt}`; // just filename
+      const uploadPath = fileName;
 
       // Upload file to the 'project-files' bucket at path `uploadPath`
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -102,17 +100,17 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
       if (uploadError) throw uploadError;
 
       if (isCover) {
+        // Always delete old cover Media row for this project
         const { error: deleteError } = await supabase
           .from('Media')
           .delete()
           .eq('projectID', projectId)
           .eq('isCover', true);
-
         if (deleteError) throw deleteError;
       }
 
-      // Compose filePATH to store in DB including bucket prefix 'project-files/'
-      const filePATH = `project-files/${uploadPath}`;
+      // Store only the filename in filePATH (no 'project-files/' prefix)
+      const filePATH = fileName;
 
       const { data: mediaData, error: mediaError } = await supabase
         .from('Media')
@@ -120,12 +118,23 @@ const ProjectForm = ({ onCancel, onSave, initialData = null }) => {
           fileName: file.name,
           fileType: file.type,
           projectID: projectId,
-          filePATH,    // store with bucket prefix
+          filePATH, // just filename
           isCover: isCover
         })
         .select();
 
       if (mediaError) throw mediaError;
+
+      // If cover, update Project.coverImage to the new public URL
+      if (isCover) {
+        const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/project-files/${filePATH}`;
+        const { error: projectUpdateError } = await supabase
+          .from('Project')
+          .update({ coverImage: publicUrl })
+          .eq('projectID', projectId);
+        if (projectUpdateError) throw projectUpdateError;
+      }
 
       return mediaData[0];
     } catch (error) {
