@@ -169,6 +169,7 @@ const Dashboard = () => {
               className={`project-card ${darkMode ? 'dark' : 'light'}${selectedProject && selectedProject.projectID === project.projectID ? ' selected' : ''}`}
               key={project.projectID || i}
               onClick={() => setSelectedProject(project)}
+              data-status={project.status}
             >
               {project.coverImage ? (
                 <img
@@ -203,6 +204,7 @@ const Dashboard = () => {
                 </div>
               )}
 
+              <span className={`project-status-badge`}>{project.status}</span>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <div className="tags">
