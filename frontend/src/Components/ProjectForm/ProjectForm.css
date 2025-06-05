@@ -1,3 +1,20 @@
+.project-form select:focus,
+.project-form .selected {
+  color: #fff;
+  background: #232323;
+  border-color: #fff;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
+
+/* Light mode hover/focus for select and .selected */
+.project-form select:hover,
+.project-form select:focus,
+.project-form .selected:hover {
+  background: #232323;
+  color: #fff;
+  border-color: #232323;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+}
 .project-form-bg-blur,
 .project-form {
   /* Custom scrollbar for overlay and form */
@@ -449,10 +466,22 @@
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.save-btn:hover {
+  background: #bbb;
+  color: #232323;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+}
+.cancel-btn:hover {
+  background: #bbb;
+  color: #232323;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.10);
 }
 
 .cancel-btn {
-  background: #eee;
+  background: #232323;
 }
 
 

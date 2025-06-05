@@ -34,51 +34,64 @@ export const LoginForm = () => {
 
 
   return (
-    <div className='wrapper'>
-      <form onSubmit={handleLogin}>
-        <h1>Sign In to Your Account</h1>
-        <div className="input-box">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <FaUser className='icon' />
-        </div>
-        <div className="input-box">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <FaLock className='icon' />
-        </div>
+    <>
+      <div className="login-bg-video-wrapper">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="login-bg-video"
+        >
+          <source src="/login-background.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div className='wrapper'>
+        <form onSubmit={handleLogin}>
+          <h1>Sign In to Your Account</h1>
+          <div className="input-box">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <FaUser className='icon' />
+          </div>
+          <div className="input-box">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <FaLock className='icon' />
+          </div>
 
-        <div className="remember-forgot">
-          <label><input type="checkbox" />Remember me</label>
-          <a href="#">Forgot password?</a>
-        </div>
+          <div className="remember-forgot">
+            <label><input type="checkbox" />Remember me</label>
+            <a href="#">Forgot password?</a>
+          </div>
 
-        <button type="submit">Login</button>
+          <button type="submit">Login</button>
 
-        {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+          {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
-        <div className="register-link">
-          <p>Don't have an account? <a href="/signup" onClick={(e) => {
-          e.preventDefault(); 
-          handleSignupClick();
-        }}>
-          Sign up
-        </a>
-      </p>
-
-        </div>
-      </form>
-    </div>
+          <div className="register-link">
+            <p>Don't have an account? <a href="/signup" onClick={(e) => {
+              e.preventDefault();
+              handleSignupClick();
+            }}>
+              Sign up
+            </a>
+          </p>
+          </div>
+        </form>
+      </div>
+    </>
   )
 }
 

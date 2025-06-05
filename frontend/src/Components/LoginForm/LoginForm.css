@@ -1,3 +1,30 @@
+/* Video background for login */
+.login-bg-video-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.login-bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  filter: brightness(0.6) blur(2px); /* optional for effect */
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+}
 .wrapper {
     width: 420px;
     background: #666;

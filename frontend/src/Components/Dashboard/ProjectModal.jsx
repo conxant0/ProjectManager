@@ -284,7 +284,7 @@ const ProjectModal = ({ project, darkMode, onClose, onDelete, onProjectUpdate })
             />
           </div>
         ) : (
-          <h2>{form.title}</h2>
+          <div className="modal-project-title">{form.title}</div>
         )}
 
         {/* Description */}

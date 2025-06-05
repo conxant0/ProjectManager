@@ -1,9 +1,205 @@
-.gallery-image-wrapper {
+/* --- Zoom Overlay for Gallery Images --- */
+.zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(6px) saturate(1.1);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInZoomOverlay 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.zoom-overlay.dark {
+  background: rgba(20,20,20,0.92);
+}
+
+@keyframes fadeInZoomOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.zoomed-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 1.5px 8px rgba(25,25,25,0.10);
+  background: #fff;
+  object-fit: contain;
+  transition: box-shadow 0.2s;
+  border: 2px solid #fff;
+}
+.zoom-overlay.dark .zoomed-image {
+  background: #232323;
+  border: 2px solid #232323;
+}
+
+.zoom-close-btn {
+  position: absolute;
+  top: 32px;
+  right: 48px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2100;
+  transition: background 0.18s, color 0.18s;
+}
+.zoom-close-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+/* --- ProjectModal Modern Minimal Styling --- */
+.modal, .modal.dark {
+  font-family: 'Happy Monkey', cursive;
+}
+
+.modal h2 {
+  font-family: 'Happy Monkey', cursive;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: #181818;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.modal.dark h2 {
+  color: #fff;
+}
+
+.modal p, .modal textarea, .modal input, .modal select {
+  font-family: 'Happy Monkey', cursive;
+  font-size: 1.05rem;
+  color: #444;
+  letter-spacing: 0.01em;
+  transition: color 0.2s, background 0.2s;
+}
+.modal.dark p, .modal.dark textarea, .modal.dark input, .modal.dark select {
+  color: #ccc;
+}
+
+.modal textarea, .modal input, .modal select {
+  border-radius: 6px;
+  border: 1.5px solid #bbb;
+  background: #fafafa;
+  padding: 8px 10px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  outline: none;
+  box-shadow: none;
+}
+.modal.dark textarea, .modal.dark input, .modal.dark select {
+  background: #232323;
+  border: 1.5px solid #444;
+  color: #fff;
+}
+.modal textarea:focus, .modal input:focus, .modal select:focus {
+  border-color: #1976d2;
+  background: #f0f7ff;
+}
+.modal.dark textarea:focus, .modal.dark input:focus, .modal.dark select:focus {
+  border-color: #90caf9;
+  background: #181f23;
+}
+
+.modal .modal-header-buttons button {
+  background: #f2f2f2;
+  color: #232323;
+  border-radius: 50%;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+.modal.dark .modal-header-buttons button {
+  background: #232323;
+  color: #eee;
+}
+.modal .modal-header-buttons button:hover {
+  background: #1976d2;
+  color: #fff;
+}
+.modal.dark .modal-header-buttons button:hover {
+  background: #90caf9;
+  color: #232323;
+}
+
+.modal .modal-action-buttons .save-btn {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 18px;
+  font-size: 1.08rem;
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.10);
+}
+.modal .modal-action-buttons .save-btn:disabled {
+  background: #b0c4de;
+  color: #eee;
+  cursor: not-allowed;
+}
+.modal .modal-action-buttons .cancel-btn {
+  background: #eee;
+  color: #232323;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 18px;
+  font-size: 1.08rem;
+  margin-left: 8px;
+  transition: background 0.18s, color 0.18s;
+}
+.modal .modal-action-buttons .cancel-btn:hover {
+  background: #bbb;
+  color: #232323;
+}
+.modal .modal-action-buttons .delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 18px;
+  font-size: 1.08rem;
+  margin-left: 8px;
+  transition: background 0.18s;
+}
+.modal .modal-action-buttons .delete-btn:hover {
+  background: #c0392b;
+}
+
+.modal .project-cover-image {
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(25,118,210,0.10);
+  margin-bottom: 18px;
+}
+
+.modal .gallery-image-wrapper {
   position: relative;
   display: inline-block;
 }
-
-.gallery-remove-btn {
+.modal .gallery-remove-btn {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -19,62 +215,70 @@
   text-align: center;
   padding: 0;
   z-index: 2;
+  transition: background 0.18s, color 0.18s;
 }
-
-.gallery-add-label {
+.modal .gallery-remove-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+.modal .gallery-add-label {
   display: inline-block;
   width: 120px;
   height: 90px;
   border: 2px dashed #aaa;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: center;
   line-height: 90px;
   color: #888;
   cursor: pointer;
   margin-left: 8px;
+  font-size: 1.2rem;
+  background: #fafafa;
+  transition: border 0.18s, background 0.18s;
 }
-.modal-select {
-  margin-left: 8px;
-  padding: 4px;
-  background-color: #ffffff;
-  color: #000000;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.modal.dark .gallery-add-label {
+  border: 2px dashed #444;
+  background: #232323;
+  color: #bbb;
 }
-.modal-select.dark {
-  background-color: #2a2a2a;
-  color: #ffffff;
+.modal .gallery-add-label:hover {
+  border-color: #1976d2;
+  background: #f0f7ff;
+  color: #1976d2;
 }
-
-.modal-input-short {
-  margin-left: 8px;
-  padding: 4px;
-  width: 60%;
-  background-color: #ffffff;
-  color: #000000;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.modal.dark .gallery-add-label:hover {
+  border-color: #90caf9;
+  background: #181f23;
+  color: #90caf9;
 }
-.modal-input-short.dark {
-  background-color: #2a2a2a;
-  color: #ffffff;
-}
+/* --- Minimalist Modern Modal Content Styles --- */
 .cover-image-upload-section {
   margin: 12px 0;
 }
-
 .cover-image-upload-input {
   width: 100%;
-  padding: 4px;
+  padding: 8px 10px;
   margin-top: 4px;
-  background-color: #ffffff;
-  color: #000000;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background: rgba(255,255,255,0.85);
+  color: #181818;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(25,25,25,0.06);
+  font-family: 'Happy Monkey', cursive;
+  font-size: 1.05rem;
+  transition: background 0.18s, color 0.18s;
 }
-.cover-image-upload-input.dark {
-  background-color: #2a2a2a;
-  color: #ffffff;
+.modal.dark .cover-image-upload-input {
+  background: rgba(30,30,30,0.92);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+}
+.cover-image-upload-input:focus {
+  background: #f0f7ff;
+  outline: none;
+}
+.modal.dark .cover-image-upload-input:focus {
+  background: #181f23;
 }
 
 .modal-header-buttons {
@@ -90,19 +294,60 @@
 }
 .modal-title-input {
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   margin-top: 4px;
-  background-color: #ffffff;
-  color: #000000;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background: rgba(255,255,255,0.85);
+  color: #181818;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Happy Monkey', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 6px rgba(25,25,25,0.06);
+  transition: background 0.18s, color 0.18s;
 }
+.modal.dark .modal-title-input {
+  background: rgba(30,30,30,0.92);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+}
+.modal-title-input:focus {
+  background: #f0f7ff;
+  outline: none;
+}
+.modal.dark .modal-title-input:focus {
+  background: #181f23;
+}
+
 .modal-title-input.dark {
   background-color: #2a2a2a;
   color: #ffffff;
 }
 
 .modal-description-edit-section {
+
+.modal-project-title {
+  font-family: 'Happy Monkey', cursive;
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: 0.02em;
+  line-height: 1.13;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: color 0.2s, text-shadow 0.2s;
+  text-shadow: 0 2px 12px rgba(25,25,25,0.04), 0 1px 0 #fff;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+.modal.dark .modal-project-title {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.18), 0 1px 0 #232323;
+  border-bottom: 2px solid #232323;
+}
   margin: 12px 0;
 }
 .modal-description-input {
